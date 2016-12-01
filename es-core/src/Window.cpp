@@ -4,16 +4,16 @@
 #include "AudioManager.h"
 #include "Log.h"
 #include "Settings.h"
-#include <algorithm>
 #include <iomanip>
 #include "components/HelpComponent.h"
 #include "components/ImageComponent.h"
 
 Window::Window() : mNormalizeNextUpdate(false), mFrameTimeElapsed(0), mFrameCountElapsed(0), mAverageDeltaTime(10), 
-	mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0), mScreenSaver(NULL), mRenderScreenSaver(false)
+	mAllowSleep(true), mSleeping(false), mTimeSinceLastInput(0)
 {
 	mHelp = new HelpComponent(this);
 	mBackgroundOverlay = new ImageComponent(this);
+	mBackgroundOverlay->setImage(":/scroll_gradient.png");
 }
 
 Window::~Window()
@@ -65,8 +65,6 @@ bool Window::init(unsigned int width, unsigned int height)
 		return false;
 	}
 
-	mBackgroundOverlay->setImage(":/scroll_gradient.png");
-	
 	InputManager::getInstance()->init();
 
 	ResourceManager::getInstance()->reloadAll();
@@ -107,14 +105,12 @@ void Window::input(InputConfig* config, Input input)
 	{
 		// wake up
 		mTimeSinceLastInput = 0;
-		cancelScreenSaver();
 		mSleeping = false;
 		onWake();
 		return;
 	}
 
 	mTimeSinceLastInput = 0;
-	cancelScreenSaver();
 
 	if(config->getDeviceId() == DEVICE_KEYBOARD && input.value && input.id == SDLK_g && SDL_GetModState() & KMOD_LCTRL && Settings::getInstance()->getBool("Debug"))
 	{
@@ -173,10 +169,6 @@ void Window::update(int deltaTime)
 
 	if(peekGui())
 		peekGui()->update(deltaTime);
-
-	// Update the screensaver
-	if (mScreenSaver)
-		mScreenSaver->update(deltaTime);
 }
 
 void Window::render()
@@ -209,22 +201,11 @@ void Window::render()
 	}
 
 	unsigned int screensaverTime = (unsigned int)Settings::getInstance()->getInt("ScreenSaverTime");
-	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
+	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0 && mAllowSleep)
 	{
-		startScreenSaver();
-	}
-
-	// Always render the screensaver because it may perform a fade on the transition
-	renderScreenSaver();
-
-	if(mTimeSinceLastInput >= screensaverTime && screensaverTime != 0)
-	{
-		if (!isProcessing() && mAllowSleep && (!mScreenSaver || mScreenSaver->allowSleep()))
-		{
-			// go to sleep
-			mSleeping = true;
-			onSleep();
-		}
+		// go to sleep
+		mSleeping = true;
+		onSleep();
 	}
 }
 
@@ -344,49 +325,12 @@ void Window::setHelpPrompts(const std::vector<HelpPrompt>& prompts, const HelpSt
 
 void Window::onSleep()
 {
+	Renderer::setMatrix(Eigen::Affine3f::Identity());
+	unsigned char opacity = Settings::getInstance()->getString("ScreenSaverBehavior") == "dim" ? 0xA0 : 0xFF;
+	Renderer::drawRect(0, 0, Renderer::getScreenWidth(), Renderer::getScreenHeight(), 0x00000000 | opacity);
 }
 
 void Window::onWake()
 {
 
 }
-
-bool Window::isProcessing()
-{
-	return count_if(mGuiStack.begin(), mGuiStack.end(), [](GuiComponent* c) { return c->isProcessing(); }) > 0;
-}
-
-void Window::startScreenSaver()
-{
-	if (mScreenSaver && !mRenderScreenSaver)
-	{
-		// Tell the GUI components the screensaver is starting
-		for(auto i = mGuiStack.begin(); i != mGuiStack.end(); i++)
-			(*i)->onScreenSaverActivate();
-
-		mScreenSaver->startScreenSaver();
-		mRenderScreenSaver = true;
-	}
-}
-
-void Window::cancelScreenSaver()
-{
-	if (mScreenSaver && mRenderScreenSaver)
-	{
-		mScreenSaver->stopScreenSaver();
-		mRenderScreenSaver = false;
-
-		// Tell the GUI components the screensaver has stopped
-		for(auto i = mGuiStack.begin(); i != mGuiStack.end(); i++)
-			(*i)->onScreenSaverDeactivate();
-	}
-}
-
-void Window::renderScreenSaver()
-{
-	if (mScreenSaver)
-	{
-		mScreenSaver->renderScreenSaver();
-	}
-}
-

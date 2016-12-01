@@ -14,7 +14,6 @@
 #include "platform.h"
 #include "Log.h"
 #include "Window.h"
-#include "SystemScreenSaver.h"
 #include "EmulationStation.h"
 #include "Settings.h"
 #include "ScraperCmdLine.h"
@@ -211,8 +210,7 @@ int main(int argc, char* argv[])
 	//always close the log on exit
 	atexit(&onExit);
 
-	Window 				window;
-	SystemScreenSaver	screensaver(&window);
+	Window window;
 
 	ViewController::init(&window);
 	window.pushGui(ViewController::get());

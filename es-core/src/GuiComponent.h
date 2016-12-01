@@ -80,8 +80,6 @@ public:
 	
 	virtual void onShow();
 	virtual void onHide();
-	virtual void onScreenSaverActivate();
-	virtual void onScreenSaverDeactivate();
 	virtual void onRestore() {};
 
 	// Default implementation just handles <pos> and <size> tags as normalized float pairs.
