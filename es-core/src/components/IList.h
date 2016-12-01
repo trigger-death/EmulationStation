@@ -7,7 +7,6 @@
 #include "components/ImageComponent.h"
 #include "resources/Font.h"
 #include "Renderer.h"
-#include "Sound.h"
 
 enum CursorState
 {
@@ -57,7 +56,6 @@ public:
 		std::string name;
 		UserData object;
 		EntryData data;
-		std::shared_ptr<Sound> sound;
 	};
 
 protected:
@@ -302,12 +300,5 @@ protected:
 	}
 
 	virtual void onCursorChanged(const CursorState& state) {}
-	virtual void onScroll(int amt)
-	{
-		if (mEntries[mCursor].sound.get() != NULL)
-		{
-			mEntries[mCursor].sound->play();
-		}
-	}
-
+	virtual void onScroll(int amt) {}
 };
