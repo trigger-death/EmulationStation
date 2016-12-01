@@ -17,8 +17,7 @@ std::vector<const char*> settings_dont_save = boost::assign::list_of
 	("Windowed")
 	("VSync")
 	("HideConsole")
-	("IgnoreGamelist")
-	("SplashScreen");
+	("IgnoreGamelist");
 
 Settings::Settings()
 {
@@ -44,7 +43,6 @@ void Settings::setDefaults()
 	mBoolMap["DrawFramerate"] = false;
 	mBoolMap["ShowExit"] = true;
 	mBoolMap["Windowed"] = false;
-	mBoolMap["SplashScreen"] = true;
 
 #ifdef _RPI_
 	// don't enable VSync by default on the Pi, since it already 
