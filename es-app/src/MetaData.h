@@ -16,12 +16,10 @@ enum MetaDataType
 
 	//specialized types
 	MD_MULTILINE_STRING,
-	MD_IMAGE_PATH,
+	MD_PATH,
 	MD_RATING,
 	MD_DATE,
-	MD_TIME, //used for lastplayed
-	MD_VIDEO_PATH,
-	MD_MARQUEE_PATH
+	MD_TIME //used for lastplayed
 };
 
 struct MetaDataDecl

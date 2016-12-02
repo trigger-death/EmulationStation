@@ -211,7 +211,6 @@ int main(int argc, char* argv[])
 	atexit(&onExit);
 
 	Window window;
-
 	ViewController::init(&window);
 	window.pushGui(ViewController::get());
 

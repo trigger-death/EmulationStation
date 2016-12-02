@@ -92,8 +92,7 @@ std::map< std::string, ElementMapType > ThemeData::sElementMap = boost::assign::
 		("showSnapshotNoVideo", BOOLEAN)
 		("showSnapshotDelay", BOOLEAN)
 		("maintainAspect", BOOLEAN)
-		("blackBorder", BOOLEAN)
-		("tile", BOOLEAN)));
+		("blackBorder", BOOLEAN)));
 
 namespace fs = boost::filesystem;
 
