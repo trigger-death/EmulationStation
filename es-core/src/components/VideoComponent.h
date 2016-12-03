@@ -29,8 +29,6 @@ class VideoComponent : public GuiComponent
 		bool							showSnapshotNoVideo;
 		bool							showSnapshotDelay;
 		std::string						defaultVideoPath;
-		bool							maintainAspect;
-		bool							blackBorder;
 	};
 
 public:

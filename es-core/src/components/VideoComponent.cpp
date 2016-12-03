@@ -47,8 +47,6 @@ VideoComponent::VideoComponent(Window* window) :
 	mConfig.showSnapshotDelay 		= false;
 	mConfig.showSnapshotNoVideo		= false;
 	mConfig.startDelay				= 0;
-	mConfig.maintainAspect			= false;
-	mConfig.blackBorder				= true;
 
 	// Get an empty texture for rendering the video
 	mTexture = TextureResource::get("");
@@ -153,32 +151,10 @@ void VideoComponent::render(const Eigen::Affine3f& parentTrans)
 		float x2;
 		float y2;
 
-		bool  maintain_aspect = false;
-		bool  black_border = false;
-
 		x = -(float)mSize.x() * mOrigin.x();
 		y = -(float)mSize.y() * mOrigin.y();
 		x2 = x+mSize.x();
 		y2 = y+mSize.y();
-
-		// Calculate the dimensions based on whether the configuration says whether to maintain
-		// the aspect ratio of the video or not
-		if (mConfig.maintainAspect)
-		{
-			// We need to maintain the aspect ratio
-			if (!mConfig.blackBorder) {
-				// No black border
-				tex_offs_x = (1.0f - (mVideoWidth / (float)mSize.x())) / 2.0f;
-				tex_offs_y = (1.0f - (mVideoHeight / (float)mSize.y())) / 2.0f;
-			}
-			else {
-				// Calculate the size to include a black border
-				x = -(float)mVideoWidth * mOrigin.x();
-				y = -(float)mVideoHeight * mOrigin.y();
-				x2 = x + mVideoWidth;
-				y2 = y + mVideoHeight;
-			}
-		}
 
 		// Define a structure to contain the data for each vertex
 		struct Vertex
@@ -285,12 +261,6 @@ void VideoComponent::applyTheme(const std::shared_ptr<ThemeData>& theme, const s
 
 	if (elem->has("showSnapshotDelay"))
 		mConfig.showSnapshotDelay = elem->get<bool>("showSnapshotDelay");
-
-	if (elem->has("maintainAspect"))
-		mConfig.maintainAspect = elem->get<bool>("maintainAspect");
-
-	if (elem->has("blackBorder"))
-		mConfig.blackBorder = elem->get<bool>("blackBorder");
 
 	// Update the embeded static image
 	mStaticImage.setPosition(getPosition());

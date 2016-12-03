@@ -90,9 +90,7 @@ std::map< std::string, ElementMapType > ThemeData::sElementMap = boost::assign::
 		("default", PATH)
 		("delay", FLOAT)
 		("showSnapshotNoVideo", BOOLEAN)
-		("showSnapshotDelay", BOOLEAN)
-		("maintainAspect", BOOLEAN)
-		("blackBorder", BOOLEAN)));
+		("showSnapshotDelay", BOOLEAN)));
 
 namespace fs = boost::filesystem;
 
