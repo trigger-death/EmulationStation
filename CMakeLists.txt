@@ -49,6 +49,7 @@ find_package(Boost REQUIRED COMPONENTS system filesystem date_time locale)
 find_package(Eigen3 REQUIRED)
 find_package(CURL REQUIRED)
 find_package(VLC REQUIRED)
+find_package(GTest)
 
 #add ALSA for Linux
 if(${CMAKE_SYSTEM_NAME} MATCHES "Linux")
@@ -101,8 +102,10 @@ set(COMMON_INCLUDE_DIRS
     ${EIGEN3_INCLUDE_DIR}
     ${CURL_INCLUDE_DIR}
     ${VLC_INCLUDE_DIR}
+    ${GTEST_INCLUDE_DIRS}
     ${CMAKE_CURRENT_SOURCE_DIR}/external
     ${CMAKE_CURRENT_SOURCE_DIR}/es-core/src
+    ${CMAKE_CURRENT_SOURCE_DIR}/es-gamedata/src
 )
 
 #add ALSA for Linux
@@ -151,6 +154,7 @@ set(COMMON_LIBRARIES
 	${SDL2_LIBRARY}
     ${CURL_LIBRARIES}
     ${VLC_LIBRARIES}
+    ${GTEST_BOTH_LIBRARIES}
     pugixml
     nanosvg
 )
@@ -198,4 +202,5 @@ set(LIBRARY_OUTPUT_PATH ${dir} CACHE PATH "Build directory" FORCE)
 
 add_subdirectory("external")
 add_subdirectory("es-core")
+add_subdirectory("es-gamedata")
 add_subdirectory("es-app")

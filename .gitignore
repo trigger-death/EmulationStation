@@ -16,6 +16,7 @@
 
 # Compiled executable
 emulationstation
+gamedata_t
 
 # build directory
 build
