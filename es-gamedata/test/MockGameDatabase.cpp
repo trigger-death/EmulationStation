@@ -14,6 +14,7 @@ MockGameDatabase::MockGameDatabase(const std::string& path) : mDB(nullptr), mPat
 
 MockGameDatabase::~MockGameDatabase()
 {
+	remove(mPath.c_str());
 }
 
 void MockGameDatabase::create()

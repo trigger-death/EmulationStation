@@ -10,8 +10,8 @@
 #include <GameDataItemGame.h>
 #include "sqlite3.h"
 
-GameDataItemFolder::GameDataItemFolder(sqlite3* db, const std::string& sqlGames, const std::string& sqlFolders) :
-	mDB(db), mSqlGames(sqlGames), mSqlFolders(sqlFolders), mStmtGames(nullptr), mStmtFolders(nullptr), mGame(nullptr), mFolder(nullptr)
+GameDataItemFolder::GameDataItemFolder(sqlite3* db, bool flat, const GameDataSystem& system, const std::string& parentFolder) :
+	mDB(db), mFlat(flat), mSystem(system), mParentFolder(parentFolder), mStmtGames(nullptr), mStmtFolders(nullptr), mGame(nullptr), mFolder(nullptr)
 {
 }
 
@@ -35,8 +35,13 @@ GameDataItem* GameDataItemFolder::firstChild()
 	}
 	else
 	{
-		if (!mSqlGames.empty())
-			sqlite3_prepare_v2(mDB, mSqlGames.c_str(), mSqlGames.size(), &mStmtGames, NULL);
+		// Build a query for the games
+		std::stringstream ss_games;
+		if (mFlat)
+			ss_games << "SELECT * from games WHERE systemid='" << mSystem.id() << "';";
+		else
+			ss_games << "SELECT * from games WHERE systemid='" << mSystem.id() << "' AND folder='';";
+		sqlite3_prepare_v2(mDB, ss_games.str().c_str(), ss_games.str().size(), &mStmtGames, NULL);
 	}
 
 	// See if the folders query has already run
@@ -47,9 +52,20 @@ GameDataItem* GameDataItemFolder::firstChild()
 	}
 	else
 	{
-		if (!mSqlFolders.empty())
-			sqlite3_prepare_v2(mDB, mSqlFolders.c_str(), mSqlFolders.size(), &mStmtFolders, NULL);
+		// Build a query for the folders
+		std::stringstream ss_folders;
+		if (!mFlat)
+		{
+			ss_folders << "SELECT * from folders WHERE systemid='" << mSystem.id() << "' AND parent='';";
+			sqlite3_prepare_v2(mDB, ss_folders.str().c_str(), ss_folders.str().size(), &mStmtFolders, NULL);
+		}
 	}
+	// Just return the next child
+	return getNextChild();
+}
+
+GameDataItem* GameDataItemFolder::getNextChild()
+{
 	// Find the first game
 	if (mStmtGames && (sqlite3_step(mStmtGames) == SQLITE_ROW))
 	{
@@ -64,14 +80,10 @@ GameDataItem* GameDataItemFolder::firstChild()
 	else if (mStmtFolders && (sqlite3_step(mStmtFolders) == SQLITE_ROW))
 	{
 		delete mFolder;
-		mFolder = new GameDataItemFolder(mDB, mSqlGames, mSqlFolders);
+		std::string folder((const char*)sqlite3_column_text(mStmtFolders,0));
+		mFolder = new GameDataItemFolder(mDB, false, mSystem, folder);
 		return mFolder;
 	}
-	return nullptr;
-}
-
-GameDataItem* GameDataItemFolder::getNextChild()
-{
 	return nullptr;
 }
 
