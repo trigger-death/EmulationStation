@@ -81,9 +81,8 @@ GameDataItem* GameDataList::getNext()
 		const unsigned char* tags = sqlite3_column_text(mRows, TABLE_GAMES_TAGS_COL);
 		int rating = sqlite3_column_int(mRows, TABLE_GAMES_RATING_COL);
 		int playCount = sqlite3_column_int(mRows, TABLE_GAMES_PLAYCOUNT_COL);
-		mGame = new GameDataItem((const char*)id, systemId ? (const char*)systemId : "",
-								 path ? (const char*)path : "", tags ? (const char*)tags : "",
-								 rating, playCount);
+		mGame = new GameDataItem(mDB, (const char*)id, systemId ? (const char*)systemId : "",
+								 path ? (const char*)path : "", rating, playCount);
 		return mGame;
 	}
 	return nullptr;

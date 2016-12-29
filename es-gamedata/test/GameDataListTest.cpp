@@ -7,7 +7,7 @@
 TEST(GameDataList, SingleGame) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
 
 	GameDataList gdl(db.mDB);
 
@@ -27,9 +27,9 @@ TEST(GameDataList, SingleGame) {
 TEST(GameDataList, MultipleGames) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
 
 	GameDataList gdl(db.mDB);
 
@@ -64,8 +64,8 @@ TEST(GameDataList, MultipleGames) {
 TEST(GameDataList, SingleGameMultipleSystems) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("1943", "nes", "~/NES/1943.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("1943", "nes", "~/NES/1943.zip", "3", "0");
 
 	GameDataList gdl(db.mDB);
 	gdl.filterSystem("nes");
@@ -85,15 +85,15 @@ TEST(GameDataList, SingleGameMultipleSystems) {
 TEST(GameDataList, MultipleGamesMultipleSystems) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	GameDataList gdl(db.mDB);
 	gdl.filterSystem("c64");
@@ -124,15 +124,15 @@ TEST(GameDataList, MultipleGamesMultipleSystems) {
 TEST(GameDataList, SingleTagAny) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -161,15 +161,15 @@ TEST(GameDataList, SingleTagAny) {
 TEST(GameDataList, SingleTagAll) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -199,15 +199,15 @@ TEST(GameDataList, SingleTagAll) {
 TEST(GameDataList, MultipleTagAny) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -238,15 +238,15 @@ TEST(GameDataList, MultipleTagAny) {
 TEST(GameDataList, MultipleTagAny2) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -279,15 +279,15 @@ TEST(GameDataList, MultipleTagAny2) {
 TEST(GameDataList, MultipleTagAll) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -314,15 +314,15 @@ TEST(GameDataList, MultipleTagAll) {
 TEST(GameDataList, MultipleTagAll2) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -354,15 +354,15 @@ TEST(GameDataList, MultipleTagAll2) {
 TEST(GameDataList, MultipleTagAny3) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -407,15 +407,15 @@ TEST(GameDataList, MultipleTagAny3) {
 TEST(GameDataList, MultipleTagAll3) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -462,15 +462,15 @@ TEST(GameDataList, MultipleTagAll3) {
 TEST(GameDataList, MultipleTagAnySystem) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -513,15 +513,15 @@ TEST(GameDataList, MultipleTagAnySystem) {
 TEST(GameDataList, MultipleTagAllSystem) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");

@@ -24,7 +24,6 @@ public:
 		std::string 		fileid,
 		std::string 		systemid,
 		std::string			path,
-		std::string			tags,
 		std::string			rating,
 		std::string			playcount
 	);

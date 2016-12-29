@@ -50,7 +50,6 @@ void MockGameDatabase::create()
 		"systemid TEXT NOT NULL, " <<
 		"path TEXT, " <<
 		"folder TEXT, " <<
-		"tags TEXT, " <<
 		"rating INT DEFAULT 3, " <<
 		"playcount INT DEFAULT 0, " <<
 		"PRIMARY KEY (fileid, systemid))";
@@ -110,7 +109,6 @@ void MockGameDatabase::addGame(
 	std::string 			fileid,
 	std::string 			systemid,
 	std::string			path,
-	std::string			tags,
 	std::string			rating,
 	std::string			playcount)
 {
@@ -119,7 +117,6 @@ void MockGameDatabase::addGame(
 	if (!fileid.empty()) fields.push_back(make_pair("fileid", fileid));
 	if (!systemid.empty()) fields.push_back(make_pair("systemid", systemid));
 	if (!path.empty()) fields.push_back(make_pair("path", path));
-	if (!tags.empty()) fields.push_back(make_pair("tags", tags));
 	if (!rating.empty()) fields.push_back(make_pair("rating", rating));
 	if (!playcount.empty()) fields.push_back(make_pair("playcount", playcount));
 

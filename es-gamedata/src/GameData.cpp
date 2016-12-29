@@ -130,7 +130,6 @@ void GameData::createTables()
 		"fileid TEXT NOT NULL, " <<
 		"systemid TEXT NOT NULL, " <<
 		"path TEXT, " <<
-		"tags TEXT, " <<
 		"rating INT DEFAULT 3, " <<
 		"playcount INT DEFAULT 0, " <<
 		"PRIMARY KEY (fileid, systemid))";
