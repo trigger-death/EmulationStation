@@ -22,7 +22,16 @@ enum
 	TABLE_GAMES_FILEID_COL,
 	TABLE_GAMES_SYSTEMID_COL,
 	TABLE_GAMES_PATH_COL,
-	TABLE_GAMES_FOLDER_COL
+	TABLE_GAMES_FOLDER_COL,
+	TABLE_GAMES_TAGS_COL,
+	TABLE_GAMES_RATING_COL,
+	TABLE_GAMES_PLAYCOUNT_COL
+};
+
+enum
+{
+	TABLE_TAGS_ID_COL,
+	TABLE_TAGS_TAG_COL
 };
 
 //
@@ -55,11 +64,10 @@ public:
 	 * Get the game list for a particular system
 	 *
 	 * @return			Gamelist
-	 * @param system	System to get gamelist for
-	 * @param flat		true=get a flat view of all the games (i.e. do not traverse folders)
-	 * 					false=get top level view which may include folders
+	 * @param system	System to get gamelist for or empty string for all systems
+	 * @param tags		List of tags to filter by or empty for all tags
 	 */
-	GameDataList& getGameList(const GameDataSystem& system, bool flat);
+	GameDataList getGameList(std::string system, std::vector<std::string> tags);
 
 protected:
 	/*!

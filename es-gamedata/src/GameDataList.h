@@ -9,26 +9,25 @@
 #define SRC_GAMEDATALIST_H_
 
 #include "sqlite3.h"
-class GameDataItemFolder;
-class GameDataSystem;
+#include <string>
+#include <vector>
+
+class GameDataItem;
 
 class GameDataList {
 public:
-	GameDataList(sqlite3* db, const GameDataSystem& system, bool flat);
+	GameDataList(sqlite3* db, std::string system, std::vector<std::string> tags);
 	virtual ~GameDataList();
 
-	/*!
-	 * Get the root item. this will be a 'folder' type item that contains child items
-	 *
-	 * @return Pointer to root item
-	 */
-	GameDataItemFolder* root();
+	virtual GameDataItem* getFirst();
+	virtual GameDataItem* getNext();
 
 private:
 	sqlite3*					mDB;
-	const GameDataSystem&		mSystem;
-	bool						mFlat;
-	GameDataItemFolder*			mRoot;
+	std::string					mSystem;
+	std::vector<std::string>	mTags;
+	sqlite3_stmt*				mRows;
+	GameDataItem*				mGame;
 };
 
 #endif /* SRC_GAMEDATALIST_H_ */

@@ -24,7 +24,9 @@ public:
 		const std::string& 			fileid,
 		const std::string& 			systemid,
 		const std::string&			path,
-		const std::string&			folder
+		const std::string&			tags,
+		const std::string&			rating,
+		const std::string&			playcount
 	);
 	void addMetadata(
 		const std::string& 			fileid,
@@ -42,13 +44,6 @@ public:
 		const std::string&			genre,
 		const std::string&			players
 	);
-	void addStats(
-		const std::string& 			fileid,
-		const std::string& 			systemid,
-		const std::string&			rating,
-		const std::string&			playcount,
-		const std::string&			groups
-	);
 	void addFolder(
 		const std::string&			name,
 		const std::string&			description,
@@ -56,7 +51,7 @@ public:
 		const std::string&			thumbnail,
 		const std::string&			parent
 	);
-	void addGroup(
+	void addTag(
 		const std::string& 			name
 	);
 

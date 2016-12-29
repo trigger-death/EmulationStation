@@ -5,22 +5,22 @@ project (gamedata)
 
 set(GAMEDATA_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameData.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataException.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataList.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataSystem.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItem.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItemFolder.h
-	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItemGame.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataTags.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MetaData.h
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PlatformId.h
 )
 
 set(GAMEDATA_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameData.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataException.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataList.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataSystem.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItem.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItemFolder.cpp
-	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItemGame.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataTags.cpp	
     ${CMAKE_CURRENT_SOURCE_DIR}/src/MameNameMap.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/MetaData.cpp
     ${CMAKE_CURRENT_SOURCE_DIR}/src/PlatformId.cpp
@@ -39,7 +39,10 @@ if(GTEST_FOUND)
 		gamedata_t
 		test/TestMain.cpp
 		test/GameDataTest.cpp
+		test/GameDataItemTest.cpp
+		test/GameDataListTest.cpp
 		test/GameDataSystemTest.cpp
+		test/GameDataTagsTest.cpp
 		test/MockGameDatabase.h
 		test/MockGameDatabase.cpp
 	)

@@ -94,14 +94,9 @@ void GameData::parseGameList(const GameDataSystem& system, const boost::filesyst
 	}
 }
 
-GameDataList& GameData::getGameList(const GameDataSystem& system, bool flat)
+GameDataList GameData::getGameList(std::string system, std::vector<std::string> tags)
 {
-	auto it = mGames.find(system.id());
-	if (it == mGames.end())
-	{
-		mGames[system.id()] = new GameDataList(mDB, system, flat);
-	}
-	return *mGames[system.id()];
+	return GameDataList(mDB, system, tags);
 }
 
 void GameData::createTables()
@@ -129,25 +124,15 @@ void GameData::createTables()
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
 		LOG(LogError) << "Could not create metadata table: " << sqlite3_errmsg(mDB) << std::endl;
 
-	// Stats
-	ss.str("");
-	ss << "CREATE TABLE IF NOT EXISTS stats (" <<
-		"fileid VARCHAR(255) NOT NULL, " <<
-		"systemid VARCHAR(255) NOT NULL, " <<
-		"rating INT DEFAULT 3, " <<
-		"playcount INT DEFAULT 0, " <<
-		"groups TEXT, " <<
-		"PRIMARY KEY (fileid, systemid))";
-	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
-		LOG(LogError) << "Could not create stats table: " << sqlite3_errmsg(mDB) << std::endl;
-
 	// Games
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS games (" <<
 		"fileid VARCHAR(255) NOT NULL, " <<
 		"systemid VARCHAR(255) NOT NULL, " <<
 		"path TEXT, " <<
-		"folder TEXT, " <<
+		"tags TEXT, " <<
+		"rating INT DEFAULT 3, " <<
+		"playcount INT DEFAULT 0, " <<
 		"PRIMARY KEY (fileid, systemid))";
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
 		LOG(LogError) << "Could not create games table: " << sqlite3_errmsg(mDB) << std::endl;
@@ -164,11 +149,12 @@ void GameData::createTables()
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
 		LOG(LogError) << "Could not create folders table: " << sqlite3_errmsg(mDB) << std::endl;
 
-	// Groups
+	// Tags
 	ss.str("");
-	ss << "CREATE TABLE IF NOT EXISTS groups (" <<
-		"name TEXT NOT NULL, " <<
-		"PRIMARY KEY (name))";
+	ss << "CREATE TABLE IF NOT EXISTS tags (" <<
+		"id INTEGER PRIMARY KEY, " <<
+		"tag TEXT NOT NULL" <<
+		")";
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
 		LOG(LogError) << "Could not create groups table: " << sqlite3_errmsg(mDB) << std::endl;
 

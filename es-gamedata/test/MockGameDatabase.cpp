@@ -43,17 +43,6 @@ void MockGameDatabase::create()
 		"PRIMARY KEY (fileid, systemid))";
 	ASSERT_EQ(sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 
-	// Stats
-	ss.str("");
-	ss << "CREATE TABLE IF NOT EXISTS stats (" <<
-		"fileid VARCHAR(255) NOT NULL, " <<
-		"systemid VARCHAR(255) NOT NULL, " <<
-		"rating INT DEFAULT 3, " <<
-		"playcount INT DEFAULT 0, " <<
-		"groups TEXT, " <<
-		"PRIMARY KEY (fileid, systemid))";
-	ASSERT_EQ(sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
-
 	// Games
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS games (" <<
@@ -61,6 +50,9 @@ void MockGameDatabase::create()
 		"systemid VARCHAR(255) NOT NULL, " <<
 		"path TEXT, " <<
 		"folder TEXT, " <<
+		"tags TEXT, " <<
+		"rating INT DEFAULT 3, " <<
+		"playcount INT DEFAULT 0, " <<
 		"PRIMARY KEY (fileid, systemid))";
 	ASSERT_EQ(sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 
@@ -74,11 +66,12 @@ void MockGameDatabase::create()
 		"PRIMARY KEY (path))";
 	ASSERT_EQ(sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 
-	// Groups
+	// Tags
 	ss.str("");
-	ss << "CREATE TABLE IF NOT EXISTS groups (" <<
-		"name TEXT NOT NULL, " <<
-		"PRIMARY KEY (name))";
+	ss << "CREATE TABLE IF NOT EXISTS tags (" <<
+		"id INTEGER PRIMARY KEY, " <<
+		"tag TEXT NOT NULL" <<
+		")";
 	ASSERT_EQ(sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 }
 
@@ -116,14 +109,18 @@ void MockGameDatabase::addGame(
 	const std::string& 			fileid,
 	const std::string& 			systemid,
 	const std::string&			path,
-	const std::string&			folder)
+	const std::string&			tags,
+	const std::string&			rating,
+	const std::string&			playcount)
 {
 	std::stringstream sql;
 	std::vector<std::pair<std::string, std::string> > fields;
 	if (!fileid.empty()) fields.push_back(make_pair("fileid", fileid));
 	if (!systemid.empty()) fields.push_back(make_pair("systemid", systemid));
 	if (!path.empty()) fields.push_back(make_pair("path", path));
-	if (!folder.empty()) fields.push_back(make_pair("folder", folder));
+	if (!tags.empty()) fields.push_back(make_pair("tags", tags));
+	if (!rating.empty()) fields.push_back(make_pair("rating", rating));
+	if (!playcount.empty()) fields.push_back(make_pair("playcount", playcount));
 
 	buildSql("games", fields, sql);
 	ASSERT_EQ(sqlite3_exec(mDB, sql.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
@@ -166,25 +163,6 @@ void MockGameDatabase::addMetadata(
 	ASSERT_EQ(sqlite3_exec(mDB, sql.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 }
 
-void MockGameDatabase::addStats(
-	const std::string& 			fileid,
-	const std::string& 			systemid,
-	const std::string&			rating,
-	const std::string&			playcount,
-	const std::string&			groups)
-{
-	std::stringstream sql;
-	std::vector<std::pair<std::string, std::string> > fields;
-	if (!fileid.empty()) fields.push_back(make_pair("fileid", fileid));
-	if (!systemid.empty()) fields.push_back(make_pair("systemid", systemid));
-	if (!rating.empty()) fields.push_back(make_pair("rating", rating));
-	if (!playcount.empty()) fields.push_back(make_pair("playcount", playcount));
-	if (!groups.empty()) fields.push_back(make_pair("groups", groups));
-
-	buildSql("stats", fields, sql);
-	ASSERT_EQ(sqlite3_exec(mDB, sql.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
-}
-
 void MockGameDatabase::addFolder(
 	const std::string&			name,
 	const std::string&			description,
@@ -204,12 +182,12 @@ void MockGameDatabase::addFolder(
 	ASSERT_EQ(sqlite3_exec(mDB, sql.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 }
 
-void MockGameDatabase::addGroup(
-	const std::string& 			name)
+void MockGameDatabase::addTag(
+	const std::string& 			tag)
 {
 	std::stringstream sql;
 	std::vector<std::pair<std::string, std::string> > fields;
-	fields.push_back(make_pair("name", name));
+	fields.push_back(make_pair("tag", tag));
 
 	buildSql("group", fields, sql);
 	ASSERT_EQ(sqlite3_exec(mDB, sql.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
