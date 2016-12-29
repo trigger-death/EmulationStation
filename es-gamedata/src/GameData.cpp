@@ -94,9 +94,9 @@ void GameData::parseGameList(const GameDataSystem& system, const boost::filesyst
 	}
 }
 
-GameDataList GameData::getGameList(std::string system, std::vector<std::string> tags)
+GameDataList GameData::getGameList()
 {
-	return GameDataList(mDB, system, tags);
+	return GameDataList(mDB);
 }
 
 void GameData::createTables()
@@ -106,8 +106,8 @@ void GameData::createTables()
 	// Metadata
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS metadata (" <<
-		"fileid VARCHAR(255) NOT NULL, " <<
-		"systemid VARCHAR(255) NOT NULL, " <<
+		"fileid TEXT NOT NULL, " <<
+		"systemid TEXT NOT NULL, " <<
 		"name TEXT, " <<
 		"description TEXT, " <<
 		"image TEXT, " <<
@@ -127,8 +127,8 @@ void GameData::createTables()
 	// Games
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS games (" <<
-		"fileid VARCHAR(255) NOT NULL, " <<
-		"systemid VARCHAR(255) NOT NULL, " <<
+		"fileid TEXT NOT NULL, " <<
+		"systemid TEXT NOT NULL, " <<
 		"path TEXT, " <<
 		"tags TEXT, " <<
 		"rating INT DEFAULT 3, " <<
@@ -152,7 +152,8 @@ void GameData::createTables()
 	// Tags
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS tags (" <<
-		"id INTEGER PRIMARY KEY, " <<
+		"fileid TEXT NOT NULL, " <<
+		"systemid TEXT NOT NULL, " <<
 		"tag TEXT NOT NULL" <<
 		")";
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))

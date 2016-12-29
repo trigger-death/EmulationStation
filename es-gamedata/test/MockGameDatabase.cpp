@@ -8,7 +8,7 @@
 #include "MockGameDatabase.h"
 #include <gtest/gtest.h>
 
-MockGameDatabase::MockGameDatabase(const std::string& path) : mDB(nullptr), mPath(path)
+MockGameDatabase::MockGameDatabase(std::string path) : mDB(nullptr), mPath(path)
 {
 }
 
@@ -26,8 +26,8 @@ void MockGameDatabase::create()
 	// Metadata
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS metadata (" <<
-		"fileid VARCHAR(255) NOT NULL, " <<
-		"systemid VARCHAR(255) NOT NULL, " <<
+		"fileid TEXT NOT NULL, " <<
+		"systemid TEXT NOT NULL, " <<
 		"name TEXT, " <<
 		"description TEXT, " <<
 		"image TEXT, " <<
@@ -46,8 +46,8 @@ void MockGameDatabase::create()
 	// Games
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS games (" <<
-		"fileid VARCHAR(255) NOT NULL, " <<
-		"systemid VARCHAR(255) NOT NULL, " <<
+		"fileid TEXT NOT NULL, " <<
+		"systemid TEXT NOT NULL, " <<
 		"path TEXT, " <<
 		"folder TEXT, " <<
 		"tags TEXT, " <<
@@ -69,7 +69,8 @@ void MockGameDatabase::create()
 	// Tags
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS tags (" <<
-		"id INTEGER PRIMARY KEY, " <<
+		"fileid TEXT NOT NULL, " <<
+		"systemid TEXT NOT NULL, " <<
 		"tag TEXT NOT NULL" <<
 		")";
 	ASSERT_EQ(sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
@@ -82,7 +83,7 @@ void MockGameDatabase::close()
 	mDB = nullptr;
 }
 
-void MockGameDatabase::buildSql(const std::string& table, const std::vector<std::pair<std::string, std::string> >& fields, std::stringstream& sql)
+void MockGameDatabase::buildSql(std::string table, const std::vector<std::pair<std::string, std::string> >& fields, std::stringstream& sql)
 {
 	bool first = true;
 	sql << "INSERT INTO " << table << " ('";
@@ -106,12 +107,12 @@ void MockGameDatabase::buildSql(const std::string& table, const std::vector<std:
 }
 
 void MockGameDatabase::addGame(
-	const std::string& 			fileid,
-	const std::string& 			systemid,
-	const std::string&			path,
-	const std::string&			tags,
-	const std::string&			rating,
-	const std::string&			playcount)
+	std::string 			fileid,
+	std::string 			systemid,
+	std::string			path,
+	std::string			tags,
+	std::string			rating,
+	std::string			playcount)
 {
 	std::stringstream sql;
 	std::vector<std::pair<std::string, std::string> > fields;
@@ -127,20 +128,20 @@ void MockGameDatabase::addGame(
 }
 
 void MockGameDatabase::addMetadata(
-	const std::string& 			fileid,
-	const std::string& 			systemid,
-	const std::string&			name,
-	const std::string&			description,
-	const std::string&			image,
-	const std::string&			marquee,
-	const std::string&			snapshot,
-	const std::string&			thumbnail,
-	const std::string&			video,
-	const std::string&			releasedate,
-	const std::string&			developer,
-	const std::string&			publisher,
-	const std::string&			genre,
-	const std::string&			players)
+	std::string 			fileid,
+	std::string 			systemid,
+	std::string			name,
+	std::string			description,
+	std::string			image,
+	std::string			marquee,
+	std::string			snapshot,
+	std::string			thumbnail,
+	std::string			video,
+	std::string			releasedate,
+	std::string			developer,
+	std::string			publisher,
+	std::string			genre,
+	std::string			players)
 {
 	std::stringstream sql;
 	std::vector<std::pair<std::string, std::string> > fields;
@@ -164,11 +165,11 @@ void MockGameDatabase::addMetadata(
 }
 
 void MockGameDatabase::addFolder(
-	const std::string&			name,
-	const std::string&			description,
-	const std::string&			image,
-	const std::string&			thumbnail,
-	const std::string&			parent)
+	std::string			name,
+	std::string			description,
+	std::string			image,
+	std::string			thumbnail,
+	std::string			parent)
 {
 	std::stringstream sql;
 	std::vector<std::pair<std::string, std::string> > fields;
@@ -183,12 +184,16 @@ void MockGameDatabase::addFolder(
 }
 
 void MockGameDatabase::addTag(
-	const std::string& 			tag)
+		std::string 		fileid,
+		std::string 		systemid,
+		std::string 		tag)
 {
 	std::stringstream sql;
 	std::vector<std::pair<std::string, std::string> > fields;
+	fields.push_back(make_pair("fileid", fileid));
+	fields.push_back(make_pair("systemid", systemid));
 	fields.push_back(make_pair("tag", tag));
 
-	buildSql("group", fields, sql);
+	buildSql("tags", fields, sql);
 	ASSERT_EQ(sqlite3_exec(mDB, sql.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 }

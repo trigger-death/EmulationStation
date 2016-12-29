@@ -17,11 +17,10 @@ TEST(GameData, GetGameList) {
 	db.close();
 
 	GameData 					gd;
-	std::vector<std::string> 	tags;
 
 	// Open the test database
 	ASSERT_TRUE(gd.openDatabase("/tmp/testdb.db"));
-	GameDataList gdl = gd.getGameList("arcade", tags);
+	GameDataList gdl = gd.getGameList();
 
 	GameDataItem* item = gdl.getFirst();
 	ASSERT_NE(item, nullptr);

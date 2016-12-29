@@ -11,16 +11,28 @@
 #include <sstream>
 #include <iostream>
 
-GameDataList::GameDataList(sqlite3* db, std::string system, std::vector<std::string> tags) :
-	mDB(db), mSystem(system), mTags(tags), mRows(nullptr), mGame(nullptr)
+GameDataList::GameDataList(sqlite3* db) :
+	mDB(db), mRows(nullptr), mGame(nullptr), mMatchAll(false)
 {
 }
 
 GameDataList::~GameDataList()
 {
 	delete mGame;
-	if (mRows)
-		sqlite3_finalize(mRows);
+	resetQuery();
+}
+
+void GameDataList::filterSystem(std::string systemId)
+{
+	resetQuery();
+	mSystemId = systemId;
+}
+
+void GameDataList::filterTags(std::set<std::string> tags, bool matchAll)
+{
+	resetQuery();
+	mTags = tags;
+	mMatchAll = matchAll;
 }
 
 GameDataItem* GameDataList::getFirst()
@@ -33,32 +45,24 @@ GameDataItem* GameDataList::getFirst()
 	}
 	else
 	{
-		// Build a query based on the system and tags
-		bool haveWhere = false;
-		std::stringstream query;
-		query << "SELECT * FROM games ";
-		// See if there is a system clause
-		if (!mSystem.empty())
+		// See which type of query to build
+		std::string query;
+		if (mTags.size() > 0)
 		{
-			query << "WHERE systemid='" << mSystem << "' ";
-			haveWhere = true;
-		}
-		// Now add any tags
-		for (auto it = mTags.begin(); it != mTags.end(); ++it)
-		{
-			// Make sure we've added the 'WHERE' tag
-			if (!haveWhere)
+			if (mMatchAll)
 			{
-				query << "WHERE ";
-				haveWhere = true;
+				query = buildMatchAllQuery();
 			}
 			else
 			{
-				query << "AND ";
+				query = buildMatchAnyQuery();
 			}
-			query << "where (',' || tags || ',') LIKE '%," << *it << ",%') ";
 		}
-		sqlite3_prepare_v2(mDB, query.str().c_str(), query.str().size(), &mRows, NULL);
+		else
+		{
+			query = buildSimpleQuery();
+		}
+		sqlite3_prepare_v2(mDB, query.c_str(), query.size(), &mRows, NULL);
 	}
 	// Just return the next item
 	return getNext();
@@ -83,4 +87,90 @@ GameDataItem* GameDataList::getNext()
 		return mGame;
 	}
 	return nullptr;
+}
+
+void GameDataList::resetQuery()
+{
+	if (mRows)
+	{
+		sqlite3_finalize(mRows);
+		mRows = nullptr;
+	}
+}
+
+std::string GameDataList::buildMatchAnyQuery()
+{
+	// Build a query based on the system and tags
+	std::stringstream query;
+	query << "SELECT DISTINCT games.* FROM games INNER JOIN tags ON games.systemid=tags.systemid AND games.fileid=tags.fileid ";
+	// See if there is a system clause
+	if (!mSystemId.empty())
+		query << "WHERE games.systemid='" << mSystemId << "' AND ";
+	else
+		query << "WHERE ";
+
+	// Now add any tags
+	bool first = true;
+	for (auto it = mTags.begin(); it != mTags.end(); ++it)
+	{
+		if (!first)
+			query << "OR ";
+		first = false;
+		query << "tags.tag='" << *it << "' ";
+	}
+	return query.str();
+}
+
+std::string GameDataList::buildMatchAllQuery()
+{
+	// Build a query based on the system and tags
+	bool haveWhere = false;
+	std::stringstream query;
+	query << "SELECT DISTINCT games.* FROM games INNER JOIN tags ON games.systemid=tags.systemid AND games.fileid=tags.fileid ";
+	// See if there is a system clause
+	if (!mSystemId.empty())
+	{
+		query << "WHERE games.systemid='" << mSystemId << "' ";
+		haveWhere = true;
+	}
+	// Now add any tags
+	if (mTags.size() > 0)
+	{
+		// Make sure we've added the 'WHERE' tag
+		if (!haveWhere)
+		{
+			query << "WHERE ";
+			haveWhere = true;
+		}
+		else
+		{
+			query << "AND ";
+		}
+		query << "(SELECT COUNT(*) FROM tags WHERE systemid=games.systemid AND fileid=games.fileid AND tag IN(";
+	}
+	bool first = true;
+	for (auto it = mTags.begin(); it != mTags.end(); ++it)
+	{
+		if (first)
+			query << "'" << *it << "' ";
+		else
+			query << ", '" << *it << "' ";
+		first = false;
+	}
+	query << "))=" << mTags.size() << ";";
+	return query.str();
+}
+
+std::string GameDataList::buildSimpleQuery()
+{
+	// Build a query based on the system
+	std::stringstream query;
+	query << "SELECT * FROM games ";
+	// See if there is a system clause
+	if (!mSystemId.empty())
+	{
+		query << "WHERE games.systemid='" << mSystemId << "' ";
+	}
+	query << ";";
+	return query.str();
 }

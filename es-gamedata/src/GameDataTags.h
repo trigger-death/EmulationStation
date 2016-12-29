@@ -10,31 +10,23 @@
 
 #include "sqlite3.h"
 #include <string>
-#include <vector>
+#include <set>
 
 class GameDataTags {
 public:
-	GameDataTags(sqlite3* db, std::string tagsField);
-	GameDataTags(sqlite3* db, std::vector<std::string> tags);
+	GameDataTags(sqlite3* db, std::string systemid, std::string fileid);
 	virtual ~GameDataTags();
 
-	std::string tagField();
-	std::vector<std::string> tags();
-
-protected:
-	/*!
-	 * Get the tag ID for a text tag. Creates the entry in the tags database if
-	 * it doesn't already exist
-	 *
-	 * @return 	tag ID
-	 * @param 	tag		Textual tag to convert to ID
-	 */
-	std::string getTagID(std::string tag);
+	void addTag(std::string tag);
+	void removeTag(std::string tag);
+	bool hasTag(std::string tag);
+	void setTags(std::set<std::string> tags);
+	std::set<std::string> tags();
 
 private:
 	sqlite3* 					mDB;
-	std::string					mTagsField;
-	std::vector<std::string>	mTags;
+	std::string					mSystemId;
+	std::string					mFileId;
 };
 
 #endif /* ES_GAMEDATA_SRC_GAMEDATATAGS_H_ */

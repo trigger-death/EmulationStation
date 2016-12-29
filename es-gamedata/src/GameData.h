@@ -30,7 +30,8 @@ enum
 
 enum
 {
-	TABLE_TAGS_ID_COL,
+	TABLE_TAGS_SYSTEMID_COL,
+	TABLE_TAGS_FILEID_COL,
 	TABLE_TAGS_TAG_COL
 };
 
@@ -61,13 +62,11 @@ public:
 	void parseGameList(const GameDataSystem& system, const boost::filesystem::path& path);
 
 	/*!
-	 * Get the game list for a particular system
+	 * Get a game list that can be filtered
 	 *
 	 * @return			Gamelist
-	 * @param system	System to get gamelist for or empty string for all systems
-	 * @param tags		List of tags to filter by or empty for all tags
 	 */
-	GameDataList getGameList(std::string system, std::vector<std::string> tags);
+	GameDataList getGameList();
 
 protected:
 	/*!

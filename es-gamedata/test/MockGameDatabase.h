@@ -14,48 +14,50 @@
 
 class MockGameDatabase {
 public:
-	MockGameDatabase(const std::string& path);
+	MockGameDatabase(std::string path);
 	virtual ~MockGameDatabase();
 
 	void create();
 	void close();
 
 	void addGame(
-		const std::string& 			fileid,
-		const std::string& 			systemid,
-		const std::string&			path,
-		const std::string&			tags,
-		const std::string&			rating,
-		const std::string&			playcount
+		std::string 		fileid,
+		std::string 		systemid,
+		std::string			path,
+		std::string			tags,
+		std::string			rating,
+		std::string			playcount
 	);
 	void addMetadata(
-		const std::string& 			fileid,
-		const std::string& 			systemid,
-		const std::string&			name,
-		const std::string&			description,
-		const std::string&			image,
-		const std::string&			marquee,
-		const std::string&			snapshot,
-		const std::string&			thumbnail,
-		const std::string&			video,
-		const std::string&			releasedate,
-		const std::string&			developer,
-		const std::string&			publisher,
-		const std::string&			genre,
-		const std::string&			players
+		std::string 		fileid,
+		std::string 		systemid,
+		std::string			name,
+		std::string			description,
+		std::string			image,
+		std::string			marquee,
+		std::string			snapshot,
+		std::string			thumbnail,
+		std::string			video,
+		std::string			releasedate,
+		std::string			developer,
+		std::string			publisher,
+		std::string			genre,
+		std::string			players
 	);
 	void addFolder(
-		const std::string&			name,
-		const std::string&			description,
-		const std::string&			image,
-		const std::string&			thumbnail,
-		const std::string&			parent
+		std::string			name,
+		std::string			description,
+		std::string			image,
+		std::string			thumbnail,
+		std::string			parent
 	);
 	void addTag(
-		const std::string& 			name
+		std::string 		fileid,
+		std::string 		systemid,
+		std::string 		tag
 	);
 
-	void buildSql(const std::string& table, const std::vector<std::pair<std::string, std::string> >& fields, std::stringstream& sql);
+	void buildSql(std::string table, const std::vector<std::pair<std::string, std::string> >& fields, std::stringstream& sql);
 
 	sqlite3*							mDB;
 	std::string							mPath;

@@ -10,11 +10,7 @@
 #include "GameDataException.h"
 #include <sstream>
 
-GameDataTags::GameDataTags(sqlite3* db, std::string tagsField) : mDB(db), mTagsField(tagsField)
-{
-}
-
-GameDataTags::GameDataTags(sqlite3* db, std::vector<std::string> tags) : mDB(db), mTags(tags)
+GameDataTags::GameDataTags(sqlite3* db, std::string systemid, std::string fileid) : mDB(db), mSystemId(systemid), mFileId(fileid)
 {
 }
 
@@ -22,32 +18,74 @@ GameDataTags::~GameDataTags()
 {
 }
 
-std::string GameDataTags::tagField()
+void GameDataTags::addTag(std::string tag)
 {
-	if (mTagsField.empty() && !mTags.empty())
+	// Check to see if the tag already exists
+	std::set<std::string> current_tags = tags();
+	if (current_tags.find(tag) == current_tags.end())
 	{
-		// Convert from a list of text tags to a comma separated list of tag IDs
+		// Add it in
+		char* err;
+		std::stringstream query;
+		query << "INSERT INTO tags ('systemid', 'fileid', 'tag') VALUES ('" << mSystemId << "', '" << mFileId << "', '" << tag << "') ;";
+		if (sqlite3_exec(mDB, query.str().c_str(), NULL, NULL, &err) != SQLITE_OK)
+		{
+			std::stringstream error;
+			error << "Failed to add tag for '" << mSystemId << "', '" << mFileId << "': " << err;
+			throw GameDataException(error.str());
+		}
 	}
-	return mTagsField;
 }
 
-std::vector<std::string> GameDataTags::tags()
+bool GameDataTags::hasTag(std::string tag)
 {
-	if (mTags.empty() && !mTagsField.empty())
-	{
-		// Convert from a comma separated list of tag IDs to a list of text tags
-	}
-	return mTags;
+	std::set<std::string> all_tags = tags();
+	if (all_tags.find(tag) != all_tags.end())
+		return true;
+	return false;
 }
 
-std::string GameDataTags::getTagID(std::string tag)
+void GameDataTags::removeTag(std::string tag)
+{
+	std::stringstream query;
+	char* err;
+	query << "DELETE FROM tags WHERE systemid='" << mSystemId << "' AND fileid='" << mFileId << "' AND tag='" << tag << "' ;";
+	if (sqlite3_exec(mDB, query.str().c_str(), NULL, NULL, &err) != SQLITE_OK)
+	{
+		std::stringstream error;
+		error << "Failed to delete tag for '" << mSystemId << "', '" << mFileId << "': " << err;
+		throw GameDataException(error.str());
+	}
+}
+
+void GameDataTags::setTags(std::set<std::string> tags)
+{
+	// Remove all existing tags
+	std::stringstream query;
+	char* err;
+	query << "DELETE FROM tags WHERE systemid='" << mSystemId << "' AND fileid='" << mFileId << "' ;";
+	if (sqlite3_exec(mDB, query.str().c_str(), NULL, NULL, &err) != SQLITE_OK)
+	{
+		std::stringstream error;
+		error << "Failed to delete all tags for '" << mSystemId << "', '" << mFileId << "': " << err;
+		throw GameDataException(error.str());
+	}
+	// Now add all new tags
+	for (auto it = tags.begin(); it != tags.end(); ++it)
+	{
+		addTag(*it);
+	}
+}
+
+std::set<std::string> GameDataTags::tags()
 {
 	sqlite3_stmt* 	qresult = nullptr;
-	std::string 	result;
 	int				sqlResult;
-	// See if the tag already exists
+	std::set<std::string>	result;
+
+	// Build a query to get all tags for the game
 	std::stringstream query;
-	query << "SELECT * FROM tags WHERE tag='" << tag << "';";
+	query << "SELECT * FROM tags WHERE systemid='" << mSystemId << "' AND fileid='" << mFileId << "' ;";
 	sqlResult = sqlite3_prepare_v2(mDB, query.str().c_str(), query.str().size(), &qresult, NULL);
 	if (sqlResult != SQLITE_OK)
 	{
@@ -55,30 +93,17 @@ std::string GameDataTags::getTagID(std::string tag)
 		error << "Failed to query tags database table. Error code: " << sqlResult;
 		throw GameDataException(error.str());
 	}
-	// See if there is a row of data
-	if (sqlite3_step(qresult) == SQLITE_ROW)
+
+	// Iterate through the rows to get the tags
+	while (sqlite3_step(qresult) == SQLITE_ROW)
 	{
-		std::stringstream id;
-		id << sqlite3_column_int(qresult, TABLE_TAGS_ID_COL);
-		result = id.str();
+		const unsigned char* tag = sqlite3_column_text(qresult, TABLE_TAGS_TAG_COL);
+		if (!tag)
+			throw GameDataException("Invalid NULL tag found in tags table");
+		result.insert((const char*)tag);
 	}
 	sqlite3_finalize(qresult);
 
-	// See if it previously existed
-	if (result.empty())
-	{
-		// Doesn't exist. Add a new row
-		std::stringstream sql;
-		sql << "INSERT INTO tags (tag) VALUES ('" << tag << "');";
-		sqlResult = sqlite3_exec(mDB, sql.str().c_str(), NULL, NULL, NULL);
-		if (sqlResult != SQLITE_OK)
-		{
-			std::stringstream error;
-			error << "Failed to add tag database table. Error code: " << sqlResult;
-			throw GameDataException(error.str());
-		}
-		// Now we can just recursively call this function to get the ID
-		return getTagID(tag);
-	}
 	return result;
 }
+
