@@ -6,6 +6,7 @@ project (gamedata)
 set(GAMEDATA_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameData.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataException.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataFolder.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataList.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataSystem.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItem.h
@@ -17,6 +18,7 @@ set(GAMEDATA_HEADERS
 set(GAMEDATA_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameData.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataException.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataFolder.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataList.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataSystem.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItem.cpp
@@ -39,6 +41,7 @@ if(GTEST_FOUND)
 		gamedata_t
 		test/TestMain.cpp
 		test/GameDataTest.cpp
+		test/GameDataFolderTest.cpp
 		test/GameDataItemTest.cpp
 		test/GameDataListTest.cpp
 		test/GameDataSystemTest.cpp

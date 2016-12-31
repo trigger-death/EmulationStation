@@ -24,6 +24,7 @@ public:
 		std::string 		fileid,
 		std::string 		systemid,
 		std::string			path,
+		std::string			folder,
 		std::string			rating,
 		std::string			playcount
 	);
@@ -44,6 +45,9 @@ public:
 		std::string			players
 	);
 	void addFolder(
+		std::string			id,
+		std::string			systemid,
+		std::string			fullpath,
 		std::string			name,
 		std::string			description,
 		std::string			image,

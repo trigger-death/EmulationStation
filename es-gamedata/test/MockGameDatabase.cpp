@@ -58,11 +58,15 @@ void MockGameDatabase::create()
 	// Folders
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS folders (" <<
-		"path TEXT NOT NULL, " <<
+		"id INT, " <<
+		"systemid TEXT NOT NULL, " <<
+		"fullpath TEXT NOT NULL, " <<
+		"name TEXT NOT NULL, " <<
 		"description TEXT, " <<
 		"image TEXT, " <<
 		"thumbnail TEXT, " <<
-		"PRIMARY KEY (path))";
+		"parent TEXT" <<
+		")";
 	ASSERT_EQ(sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 
 	// Tags
@@ -106,9 +110,10 @@ void MockGameDatabase::buildSql(std::string table, const std::vector<std::pair<s
 }
 
 void MockGameDatabase::addGame(
-	std::string 			fileid,
-	std::string 			systemid,
+	std::string 		fileid,
+	std::string 		systemid,
 	std::string			path,
+	std::string			folder,
 	std::string			rating,
 	std::string			playcount)
 {
@@ -117,6 +122,7 @@ void MockGameDatabase::addGame(
 	if (!fileid.empty()) fields.push_back(make_pair("fileid", fileid));
 	if (!systemid.empty()) fields.push_back(make_pair("systemid", systemid));
 	if (!path.empty()) fields.push_back(make_pair("path", path));
+	if (!folder.empty()) fields.push_back(make_pair("folder", folder));
 	if (!rating.empty()) fields.push_back(make_pair("rating", rating));
 	if (!playcount.empty()) fields.push_back(make_pair("playcount", playcount));
 
@@ -162,6 +168,9 @@ void MockGameDatabase::addMetadata(
 }
 
 void MockGameDatabase::addFolder(
+	std::string			id,
+	std::string			systemid,
+	std::string			fullpath,
 	std::string			name,
 	std::string			description,
 	std::string			image,
@@ -170,6 +179,9 @@ void MockGameDatabase::addFolder(
 {
 	std::stringstream sql;
 	std::vector<std::pair<std::string, std::string> > fields;
+	if (!id.empty()) fields.push_back(make_pair("id", id));
+	if (!systemid.empty()) fields.push_back(make_pair("systemid", name));
+	if (!fullpath.empty()) fields.push_back(make_pair("fullpath", name));
 	if (!name.empty()) fields.push_back(make_pair("name", name));
 	if (!description.empty()) fields.push_back(make_pair("description", description));
 	if (!image.empty()) fields.push_back(make_pair("image", image));

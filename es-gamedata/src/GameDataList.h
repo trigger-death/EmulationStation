@@ -13,6 +13,7 @@
 #include <set>
 
 class GameDataItem;
+class GameDataFolder;
 
 class GameDataList {
 public:
@@ -40,15 +41,21 @@ public:
 	 */
 	void filterTags(std::set<std::string> tags, bool matchAll);
 
-	virtual GameDataItem* getFirst();
-	virtual GameDataItem* getNext();
+	/*!
+	 * Filter the list based on a system folder
+	 *
+	 * @param	folder		Folder to filter on
+	 */
+	void filterFolder(std::string folder);
+
+	/*!
+	 * Get the folder that represents the items in our query
+	 *
+	 * @return	Folder
+	 */
+	GameDataFolder* folder();
 
 private:
-	/*!
-	 * Clear out any existing query
-	 */
-	void resetQuery();
-
 	/*!
 	 * Build a query for the match-any case
 	 */
@@ -68,9 +75,9 @@ private:
 	sqlite3*					mDB;
 	std::string					mSystemId;
 	std::set<std::string>		mTags;
+	std::string					mFolderFilter;
 	bool						mMatchAll;
-	sqlite3_stmt*				mRows;
-	GameDataItem*				mGame;
+	GameDataFolder*				mFolder;
 };
 
 #endif /* SRC_GAMEDATALIST_H_ */

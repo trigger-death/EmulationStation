@@ -139,12 +139,15 @@ void GameData::createTables()
 	// Folders
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS folders (" <<
+		"id ROWID, " <<
+		"systemid TEXT NOT NULL, " <<
+		"fullpath TEXT NOT NULL, " <<
 		"name TEXT NOT NULL, " <<
 		"description TEXT, " <<
 		"image TEXT, " <<
 		"thumbnail TEXT, " <<
-		"parent TEXT, " <<
-		"PRIMARY KEY (name))";
+		"parent TEXT" <<
+		")";
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
 		LOG(LogError) << "Could not create folders table: " << sqlite3_errmsg(mDB) << std::endl;
 

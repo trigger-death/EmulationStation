@@ -2,16 +2,17 @@
 #include <string>
 #include "GameDataList.h"
 #include "GameDataItem.h"
+#include "GameDataFolder.h"
 #include "MockGameDatabase.h"
 
 TEST(GameDataList, SingleGame) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 
 	GameDataList gdl(db.mDB);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
@@ -20,20 +21,20 @@ TEST(GameDataList, SingleGame) {
 	ASSERT_EQ(item->path(), "~/Mame/1942.zip");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 
 TEST(GameDataList, MultipleGames) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
 
 	GameDataList gdl(db.mDB);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
@@ -42,7 +43,7 @@ TEST(GameDataList, MultipleGames) {
 	ASSERT_EQ(item->path(), "~/Mame/1942.zip");
 
 	// Make sure there is another game
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
@@ -50,7 +51,7 @@ TEST(GameDataList, MultipleGames) {
 	ASSERT_EQ(item->path(), "~/Mame/rtype.zip");
 
 	// Make sure there is another game
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	// Check the game data
 	ASSERT_EQ(item->id(), "bublbobl");
@@ -58,19 +59,19 @@ TEST(GameDataList, MultipleGames) {
 	ASSERT_EQ(item->path(), "~/Mame/bublbobl.zip");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 TEST(GameDataList, SingleGameMultipleSystems) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("1943", "nes", "~/NES/1943.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("1943", "nes", "~/NES/1943.zip", "", "3", "0");
 
 	GameDataList gdl(db.mDB);
 	gdl.filterSystem("nes");
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
@@ -79,26 +80,26 @@ TEST(GameDataList, SingleGameMultipleSystems) {
 	ASSERT_EQ(item->path(), "~/NES/1943.zip");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 TEST(GameDataList, MultipleGamesMultipleSystems) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	GameDataList gdl(db.mDB);
 	gdl.filterSystem("c64");
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
@@ -107,7 +108,7 @@ TEST(GameDataList, MultipleGamesMultipleSystems) {
 	ASSERT_EQ(item->path(), "~/c64/mno.zip");
 
 	// Make sure there is another game
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	// Check the game data
 	ASSERT_EQ(item->id(), "pqr");
@@ -115,7 +116,7 @@ TEST(GameDataList, MultipleGamesMultipleSystems) {
 	ASSERT_EQ(item->path(), "~/c64/pqr.zip");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 /*
@@ -124,15 +125,15 @@ TEST(GameDataList, MultipleGamesMultipleSystems) {
 TEST(GameDataList, SingleTagAny) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -145,14 +146,14 @@ TEST(GameDataList, SingleTagAny) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, false);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 /*
@@ -161,15 +162,15 @@ TEST(GameDataList, SingleTagAny) {
 TEST(GameDataList, SingleTagAll) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -182,14 +183,14 @@ TEST(GameDataList, SingleTagAll) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, true);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 /*
@@ -199,15 +200,15 @@ TEST(GameDataList, SingleTagAll) {
 TEST(GameDataList, MultipleTagAny) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -221,14 +222,14 @@ TEST(GameDataList, MultipleTagAny) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, false);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 /*
@@ -238,15 +239,15 @@ TEST(GameDataList, MultipleTagAny) {
 TEST(GameDataList, MultipleTagAny2) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -261,14 +262,14 @@ TEST(GameDataList, MultipleTagAny2) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, false);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 
 }
 
@@ -279,15 +280,15 @@ TEST(GameDataList, MultipleTagAny2) {
 TEST(GameDataList, MultipleTagAll) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -302,7 +303,7 @@ TEST(GameDataList, MultipleTagAll) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, true);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	// Make sure there are no games
 	ASSERT_EQ(item, nullptr);
 }
@@ -314,15 +315,15 @@ TEST(GameDataList, MultipleTagAll) {
 TEST(GameDataList, MultipleTagAll2) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -337,14 +338,14 @@ TEST(GameDataList, MultipleTagAll2) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, true);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 
 }
 
@@ -354,15 +355,15 @@ TEST(GameDataList, MultipleTagAll2) {
 TEST(GameDataList, MultipleTagAny3) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -382,23 +383,23 @@ TEST(GameDataList, MultipleTagAny3) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, false);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// There should be two more
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	ASSERT_EQ(item->id(), "bublbobl");
 
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	ASSERT_EQ(item->id(), "mno");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 /*
@@ -407,15 +408,15 @@ TEST(GameDataList, MultipleTagAny3) {
 TEST(GameDataList, MultipleTagAll3) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -436,23 +437,23 @@ TEST(GameDataList, MultipleTagAll3) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, true);
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// There should be two more
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	ASSERT_EQ(item->id(), "bublbobl");
 
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	ASSERT_EQ(item->id(), "mno");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 /*
@@ -462,15 +463,15 @@ TEST(GameDataList, MultipleTagAll3) {
 TEST(GameDataList, MultipleTagAnySystem) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -491,19 +492,19 @@ TEST(GameDataList, MultipleTagAnySystem) {
 	gdl.filterTags(tags, false);
 	gdl.filterSystem("arcade");
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// There should be one more
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	ASSERT_EQ(item->id(), "bublbobl");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 
 /*
@@ -513,15 +514,15 @@ TEST(GameDataList, MultipleTagAnySystem) {
 TEST(GameDataList, MultipleTagAllSystem) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "3", "0");
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
-	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "3", "0");
-	db.addGame("abc", "nes", "~/nes/abc.zip", "3", "0");
-	db.addGame("def", "snes", "~/snes/def.zip", "3", "0");
-	db.addGame("ghi", "snes", "~/snes/ghi.zip", "3", "0");
-	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "3", "0");
-	db.addGame("mno", "c64", "~/c64/mno.zip", "3", "0");
-	db.addGame("pqr", "c64", "~/c64/pqr.zip", "3", "0");
+	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "~/Mame/bublbobl.zip", "", "3", "0");
+	db.addGame("abc", "nes", "~/nes/abc.zip", "", "3", "0");
+	db.addGame("def", "snes", "~/snes/def.zip", "", "3", "0");
+	db.addGame("ghi", "snes", "~/snes/ghi.zip", "", "3", "0");
+	db.addGame("jkl", "spectrum", "~/jkl/1942.zip", "", "3", "0");
+	db.addGame("mno", "c64", "~/c64/mno.zip", "", "3", "0");
+	db.addGame("pqr", "c64", "~/c64/pqr.zip", "", "3", "0");
 
 	db.addTag("1942", "arcade", "favorite");
 	db.addTag("rtype", "arcade", "scroller");
@@ -543,18 +544,59 @@ TEST(GameDataList, MultipleTagAllSystem) {
 	gdl.filterTags(tags, true);
 	gdl.filterSystem("arcade");
 
-	GameDataItem* item = gdl.getFirst();
+	GameDataItem* item = gdl.folder()->getFirstItem();
 	ASSERT_NE(item, nullptr);
 
 	// Check the game data
 	ASSERT_EQ(item->id(), "rtype");
 
 	// There should be one more
-	item = gdl.getNext();
+	item = gdl.folder()->getNextItem();
 	ASSERT_NE(item, nullptr);
 	ASSERT_EQ(item->id(), "bublbobl");
 
 	// Make sure there are no more games
-	ASSERT_EQ(gdl.getNext(), nullptr);
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+}
+
+/*
+ * Query using based on a subfolder
+ */
+TEST(GameDataList, Subfolder) {
+	MockGameDatabase db("/tmp/testdb.db");
+	db.create();
+	// All in folder '1'
+	db.addGame("game1", "arcade", "game1.zip", "1", "3", "0");
+	db.addGame("game2", "arcade", "game2.zip", "1", "3", "0");
+	db.addGame("game3", "arcade", "game3.zip", "1", "3", "0");
+	db.addGame("game4", "arcade", "game4.zip", "1", "3", "0");
+	db.addGame("game5", "arcade", "game5.zip", "1", "3", "0");
+
+	// All in folder '2'
+	db.addGame("game6", "arcade", "game6.zip", "2", "3", "0");
+	db.addGame("game7", "arcade", "game7.zip", "2", "3", "0");
+
+	// Different system
+	db.addGame("game11", "nes", "game11.zip", "3", "3", "0");
+	db.addGame("game12", "nes", "game12.zip", "3", "3", "0");
+
+	// Build the list and filter it
+	GameDataList gdl(db.mDB);
+	gdl.filterSystem("arcade");
+	gdl.filterFolder("2");
+
+	GameDataItem* item = gdl.folder()->getFirstItem();
+	ASSERT_NE(item, nullptr);
+
+	// Check the game data
+	ASSERT_EQ(item->id(), "game6");
+
+	// There should be one more
+	item = gdl.folder()->getNextItem();
+	ASSERT_NE(item, nullptr);
+	ASSERT_EQ(item->id(), "game7");
+
+	// Make sure there are no more games
+	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
 

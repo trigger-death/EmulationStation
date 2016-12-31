@@ -8,93 +8,40 @@
 #include "GameData.h"
 #include "GameDataList.h"
 #include "GameDataItem.h"
+#include "GameDataFolder.h"
 #include <sstream>
 #include <iostream>
 
 GameDataList::GameDataList(sqlite3* db) :
-	mDB(db), mRows(nullptr), mGame(nullptr), mMatchAll(false)
+	mDB(db), mMatchAll(false), mFolder(nullptr)
 {
 }
 
 GameDataList::~GameDataList()
 {
-	delete mGame;
-	resetQuery();
+	delete mFolder;
 }
 
 void GameDataList::filterSystem(std::string systemId)
 {
-	resetQuery();
 	mSystemId = systemId;
+	delete mFolder;
+	mFolder = nullptr;
 }
 
 void GameDataList::filterTags(std::set<std::string> tags, bool matchAll)
 {
-	resetQuery();
 	mTags = tags;
 	mMatchAll = matchAll;
+	delete mFolder;
+	mFolder = nullptr;
 }
 
-GameDataItem* GameDataList::getFirst()
+void GameDataList::filterFolder(std::string folder)
 {
-	// See if we've already run the query
-	if (mRows != nullptr)
-	{
-		// Rewind back to the beginning
-		sqlite3_reset(mRows);
-	}
-	else
-	{
-		// See which type of query to build
-		std::string query;
-		if (mTags.size() > 0)
-		{
-			if (mMatchAll)
-			{
-				query = buildMatchAllQuery();
-			}
-			else
-			{
-				query = buildMatchAnyQuery();
-			}
-		}
-		else
-		{
-			query = buildSimpleQuery();
-		}
-		sqlite3_prepare_v2(mDB, query.c_str(), query.size(), &mRows, NULL);
-	}
-	// Just return the next item
-	return getNext();
-}
-
-GameDataItem* GameDataList::getNext()
-{
-	// Find the first game
-	if (mRows && (sqlite3_step(mRows) == SQLITE_ROW))
-	{
-		// Set our game item up to for this row
-		delete mGame;
-		const unsigned char* id = sqlite3_column_text(mRows, TABLE_GAMES_FILEID_COL);
-		const unsigned char* systemId = sqlite3_column_text(mRows, TABLE_GAMES_SYSTEMID_COL);
-		const unsigned char* path = sqlite3_column_text(mRows, TABLE_GAMES_PATH_COL);
-		const unsigned char* tags = sqlite3_column_text(mRows, TABLE_GAMES_TAGS_COL);
-		int rating = sqlite3_column_int(mRows, TABLE_GAMES_RATING_COL);
-		int playCount = sqlite3_column_int(mRows, TABLE_GAMES_PLAYCOUNT_COL);
-		mGame = new GameDataItem(mDB, (const char*)id, systemId ? (const char*)systemId : "",
-								 path ? (const char*)path : "", rating, playCount);
-		return mGame;
-	}
-	return nullptr;
-}
-
-void GameDataList::resetQuery()
-{
-	if (mRows)
-	{
-		sqlite3_finalize(mRows);
-		mRows = nullptr;
-	}
+	mFolderFilter = folder;
+	delete mFolder;
+	mFolder = nullptr;
 }
 
 std::string GameDataList::buildMatchAnyQuery()
@@ -156,7 +103,7 @@ std::string GameDataList::buildMatchAllQuery()
 			query << ", '" << *it << "' ";
 		first = false;
 	}
-	query << "))=" << mTags.size() << ";";
+	query << "))=" << mTags.size();
 	return query.str();
 }
 
@@ -170,6 +117,33 @@ std::string GameDataList::buildSimpleQuery()
 	{
 		query << "WHERE games.systemid='" << mSystemId << "' ";
 	}
-	query << ";";
 	return query.str();
+}
+
+GameDataFolder* GameDataList::folder()
+{
+	// Build the folder if not done already
+	if (!mFolder)
+	{
+		// See which type of query to build
+		std::string query;
+		if (mTags.size() > 0)
+		{
+			if (mMatchAll)
+			{
+				query = buildMatchAllQuery();
+			}
+			else
+			{
+				query = buildMatchAnyQuery();
+			}
+		}
+		else
+		{
+			query = buildSimpleQuery();
+		}
+		// Pass the query to the folder along with the folder filter
+		mFolder = new GameDataFolder(mDB, query, mFolderFilter);
+	}
+	return mFolder;
 }

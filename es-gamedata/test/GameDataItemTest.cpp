@@ -33,7 +33,7 @@ TEST(GameDataItem, Data) {
 TEST(GameDataItem, Tags) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
-	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "3", "0");
+	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
 	db.addTag("rtype", "arcade", "scroller");
 
 	GameDataItem	gdi(db.mDB, "rtype", "arcade", "r/rtype.zip", 4, 123);
