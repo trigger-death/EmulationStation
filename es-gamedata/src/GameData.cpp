@@ -139,7 +139,7 @@ void GameData::createTables()
 	// Folders
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS folders (" <<
-		"id ROWID, " <<
+		"id INTEGER PRIMARY KEY, " <<
 		"systemid TEXT NOT NULL, " <<
 		"fullpath TEXT NOT NULL, " <<
 		"name TEXT NOT NULL, " <<
@@ -161,4 +161,63 @@ void GameData::createTables()
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
 		LOG(LogError) << "Could not create groups table: " << sqlite3_errmsg(mDB) << std::endl;
 
+}
+
+void GameData::populateFolder(std::string systemId, std::string rootPath, std::vector<std::string> extensions)
+{
+	const fs::path& folderPath = rootPath;
+	if( !fs::is_directory(folderPath))
+	{
+		LOG(LogWarning) << "Error - folder with path \"" << folderPath << "\" is not a directory!";
+		return;
+	}
+
+	const std::string folderStr = folderPath.generic_string();
+
+	// Make sure that this isn't a symlink to a thing we already have
+	if (fs::is_symlink(folderPath))
+	{
+		// If this symlink resolves to somewhere that's at the beginning of our path, it's gonna recurse
+		if (folderStr.find(fs::canonical(folderPath).generic_string()) == 0)
+		{
+			LOG(LogWarning) << "Skipping infinitely recursive symlink \"" << folderPath << "\"";
+			return;
+		}
+	}
+
+	fs::path filePath;
+	std::string extension;
+	bool isGame;
+	for (fs::directory_iterator end, dir(folderPath); dir != end; ++dir)
+	{
+		filePath = (*dir).path();
+
+		if (filePath.stem().empty())
+			continue;
+
+		// this is a little complicated because we allow a list of extensions to be defined (delimited with a space)
+		// we first get the extension of the file itself:
+		extension = filePath.extension().string();
+
+		// fyi, folders *can* also match the extension and be added as games - this is mostly just to support higan
+		// see issue #75: https://github.com/Aloshi/EmulationStation/issues/75
+		if (std::find(extensions.begin(), extensions.end(), extension) != extensions.end())
+		{
+			// It is a game
+			isGame = true;
+		}
+		else if (fs::is_directory(filePath))
+		{
+			/*
+			FileData* newFolder = new FileData(FOLDER, filePath.generic_string(), this);
+			populateFolder(newFolder);
+
+			//ignore folders that do not contain games
+			if(newFolder->getChildrenByFilename().size() == 0)
+				delete newFolder;
+			else
+				folder->addChild(newFolder);
+				*/
+		}
+	}
 }

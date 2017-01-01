@@ -57,3 +57,37 @@ TEST(GameDataFolderTest, FolderFilter) {
 	// Make sure there are no more games
 	ASSERT_EQ(folder.getNextItem(), nullptr);
 }
+
+/*
+ * Test that we can create a new relative folder from a root folder
+ */
+TEST(GameDataFolderTest, CreateRelativeFolder) {
+	MockGameDatabase db("/tmp/testdb.db");
+	db.create();
+
+	mkdir("/tmp/es-games", S_IRWXU);
+	mkdir("/tmp/es-games/A", S_IRWXU);
+	FILE* fp = fopen("/tmp/es-games/A/abc.zip", "wb");
+	fclose(fp);
+
+	std::string folder = GameDataFolder::getGameFolder(db.mDB, "arcade", "/tmp/es-games", "/tmp/es-games/A/abc.zip", "");
+	ASSERT_NE(folder, "");
+}
+
+/*
+ * Test that we can create a new relative folder from a parent folder
+ */
+TEST(GameDataFolderTest, CreateRelativeFolderParent) {
+	MockGameDatabase db("/tmp/testdb.db");
+	db.create();
+
+	mkdir("/tmp/es-games", S_IRWXU);
+	mkdir("/tmp/es-games/A", S_IRWXU);
+	FILE* fp = fopen("/tmp/es-games/A/abc.zip", "wb");
+	fclose(fp);
+
+	std::string parent = GameDataFolder::getGameFolder(db.mDB, "arcade", "/tmp/es-games", "/tmp/es-games", "");
+	ASSERT_NE(parent, "");
+	std::string folder = GameDataFolder::getGameFolder(db.mDB, "arcade", "/tmp/es-games", "/tmp/es-games/A/abc.zip", parent);
+	ASSERT_NE(folder, "");
+}

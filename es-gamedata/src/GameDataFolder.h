@@ -27,6 +27,18 @@ public:
 	std::string thumbnail() { return mThumbnail; }
 
 	/*!
+	 * Get or create a game folder in the database if it does not already exist
+	 * @return Folder ID or an empty string if there is an error
+	 * @param db			Database object
+	 * @param systemId		System to create folder for
+	 * @param rootPath		System root path. The game path must be the same as this or a
+	 * 						subdirectory of this
+	 * @param gamePath		Path to game including filename
+	 * @param parent		Parent folder ID or an empty string if no parent
+	 */
+	static std::string getGameFolder(sqlite3* db, std::string systemId, std::string rootPath, std::string gamePath, std::string parent, bool create = true);
+
+	/*!
 	 * Get the parent folder of this folder.
 	 *
 	 * @return 	Parent or null if this is a root folder

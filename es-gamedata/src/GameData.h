@@ -35,6 +35,18 @@ enum
 	TABLE_TAGS_TAG_COL
 };
 
+enum
+{
+	TABLE_FOLDERS_ID_COL,
+	TABLE_FOLDERS_SYSTEMID_COL,
+	TABLE_FOLDERS_FULLPATH_COL,
+	TABLE_FOLDERS_NAME_COL,
+	TABLE_FOLDERS_DESCRIPTION_COL,
+	TABLE_FOLDERS_IMAGE_COL,
+	TABLE_FOLDERS_THUMBNAIL_COL,
+	TABLE_FOLDERS_PARENT_COL
+};
+
 //
 // Temporary log code
 //
@@ -67,6 +79,14 @@ public:
 	 * @return			Gamelist
 	 */
 	GameDataList getGameList();
+
+	/*!
+	 * Populate the current game list with all games in the given directory
+	 *
+	 * @param systemId	ID of system to populate
+	 * @param rootPath	Root path for system
+	 */
+	void populateFolder(std::string systemId, std::string rootPath, std::vector<std::string> extensions);
 
 protected:
 	/*!

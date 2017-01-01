@@ -58,7 +58,7 @@ void MockGameDatabase::create()
 	// Folders
 	ss.str("");
 	ss << "CREATE TABLE IF NOT EXISTS folders (" <<
-		"id INT, " <<
+		"id INTEGER PRIMARY KEY, " <<
 		"systemid TEXT NOT NULL, " <<
 		"fullpath TEXT NOT NULL, " <<
 		"name TEXT NOT NULL, " <<
