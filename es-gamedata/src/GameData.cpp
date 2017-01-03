@@ -8,6 +8,7 @@
 #include <string>
 #include <stdio.h>
 #include "GameData.h"
+#include "GameDataException.h"
 #include "pugixml/pugixml.hpp"
 #include "Util.h"
 #include "MetaData.h"
@@ -77,6 +78,7 @@ void GameData::parseGameList(const GameDataSystem& system, const boost::filesyst
 	for (int i = 0; i < 2; i++)
 	{
 		const char* tag = tagList[i];
+		sqlite3_exec(mDB, "BEGIN TRANSACTION", NULL, NULL, NULL);
 		for (pugi::xml_node fileNode = root.child(tag); fileNode; fileNode = fileNode.next_sibling(tag))
 		{
 			// Get the path
@@ -86,11 +88,18 @@ void GameData::parseGameList(const GameDataSystem& system, const boost::filesyst
 			if (system.hasPlatformId(PlatformIds::ARCADE) || system.hasPlatformId(PlatformIds::NEOGEO))
 				defaultName = PlatformIds::getCleanMameName(defaultName.c_str());
 
+			addGame(system, path.generic_string(), defaultName);
+
 			MetaDataList mdl = MetaDataList::createFromXML(GAME_METADATA, fileNode, relativeTo);
 			//make sure name gets set if one didn't exist
 			if (mdl.get("name").empty())
 				mdl.set("name", defaultName);
+
+			// Populate the metadata in the database
+			for (auto it = mdl.getMetadata().begin(); it != mdl.getMetadata().end(); ++it)
+				addMetadata(system, defaultName, it->first, it->second);
 		}
+		sqlite3_exec(mDB, "END TRANSACTION", NULL, NULL, NULL);
 	}
 }
 
@@ -108,19 +117,8 @@ void GameData::createTables()
 	ss << "CREATE TABLE IF NOT EXISTS metadata (" <<
 		"fileid TEXT NOT NULL, " <<
 		"systemid TEXT NOT NULL, " <<
-		"name TEXT, " <<
-		"description TEXT, " <<
-		"image TEXT, " <<
-		"marquee TEXT, " <<
-		"snapshot TEXT, " <<
-		"thumbnail TEXT, " <<
-		"video TEXT, " <<
-		"releasedate TEXT, " <<
-		"developer TEXT, " <<
-		"publisher TEXT, " <<
-		"genre TEXT, " <<
-		"players INT DEFAULT 1, " <<
-		"PRIMARY KEY (fileid, systemid))";
+		"tag TEXT, " <<
+		"value TEXT)";
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
 		LOG(LogError) << "Could not create metadata table: " << sqlite3_errmsg(mDB) << std::endl;
 
@@ -219,5 +217,89 @@ void GameData::populateFolder(std::string systemId, std::string rootPath, std::v
 				folder->addChild(newFolder);
 				*/
 		}
+	}
+}
+
+void GameData::addGame(const GameDataSystem& system, std::string path, std::string name)
+{
+	// Find the path relative to the system root directory
+	bool contains;
+	// Find the relative path
+	fs::path rel = removeCommonPath(path, system.getRootPath(), contains);
+	if (!contains)
+	{
+		LOG(LogError) << "Game path \"" << path << "\" is outside system path \"" << system.getRootPath() << "\"";
+		return;
+	}
+	// Find the filename and use it as the game ID
+	if (name.empty())
+	{
+		name = rel.stem().generic_string();
+	}
+
+	// See if it already exists
+	if (!gameExists(system.id(), name))
+	{
+		// Attempt to insert it. The system ID and game ID form a unique ID so the insert will
+		// fail if it already exists
+		std::stringstream 	query;
+		char* err;
+		query << "INSERT INTO games ('fileid', 'systemid', 'path') VALUES ('" <<
+				name << "', '" << system.id() << "', '" << rel.generic_string() << "')";
+		int sqlret = sqlite3_exec(mDB, query.str().c_str(), NULL, NULL, &err);
+		if ((sqlret != SQLITE_OK) && (sqlret != SQLITE_CONSTRAINT))
+		{
+			std::stringstream error;
+			error << "Failed to insert game: " << path << ", Error: " << err;
+			throw GameDataException(error.str());
+		}
+	}
+}
+
+bool GameData::gameExists(std::string systemId, std::string gameId)
+{
+	bool 				exists = false;
+	std::stringstream 	query;
+	sqlite3_stmt*		result;
+	query << "SELECT COUNT(*) FROM games WHERE systemid='" << systemId << "' AND fileid='" << gameId << "'";
+	int sqlret = sqlite3_prepare_v2(mDB, query.str().c_str(), query.str().size(), &result, NULL);
+	if (sqlret != SQLITE_OK)
+	{
+		std::stringstream error;
+		error << "Failed to query game: " << systemId << ", " << gameId << "Error: " << sqlret;
+		throw GameDataException(error.str());
+	}
+	if (sqlite3_column_int(result, 0) > 0)
+		exists = true;
+
+	sqlite3_finalize(result);
+
+	return exists;
+}
+
+void GameData::addMetadata(const GameDataSystem& system, std::string id, std::string tag, std::string value)
+{
+	std::stringstream	query;
+	char*				err;
+
+	size_t pos;
+	for (pos = 0; pos < value.size(); ++pos)
+	{
+		if (value[pos] == '\'')
+			value[pos] = '\"';
+	}
+
+	query << "INSERT INTO metadata ('systemid', 'fileid', 'tag', 'value') VALUES ('" << system.id() << "', '" <<
+		     id << "', '" << tag << "', '" << value << "')";
+
+	int sqlret = sqlite3_exec(mDB, query.str().c_str(), NULL, NULL, &err);
+	if ((sqlret != SQLITE_OK) && (sqlret != SQLITE_CONSTRAINT))
+	{
+		std::stringstream error;
+		error << "Failed to insert metadata for: " << system.id() << ", " << id << ", Error: " << err;
+		std::cerr << error.str() << std::endl;
+		std::cerr << query.str() << std::endl;
+		exit(1);
+		throw GameDataException(error.str());
 	}
 }

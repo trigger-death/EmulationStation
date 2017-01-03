@@ -28,19 +28,8 @@ void MockGameDatabase::create()
 	ss << "CREATE TABLE IF NOT EXISTS metadata (" <<
 		"fileid TEXT NOT NULL, " <<
 		"systemid TEXT NOT NULL, " <<
-		"name TEXT, " <<
-		"description TEXT, " <<
-		"image TEXT, " <<
-		"marquee TEXT, " <<
-		"snapshot TEXT, " <<
-		"thumbnail TEXT, " <<
-		"video TEXT, " <<
-		"releasedate TEXT, " <<
-		"developer TEXT, " <<
-		"publisher TEXT, " <<
-		"genre TEXT, " <<
-		"players INT DEFAULT 1, " <<
-		"PRIMARY KEY (fileid, systemid))";
+		"tag TEXT, " <<
+		"value TEXT)";
 	ASSERT_EQ(sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL), SQLITE_OK);
 
 	// Games

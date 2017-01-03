@@ -60,6 +60,7 @@ public:
 
 	inline MetaDataListType getType() const { return mType; }
 	inline const std::vector<MetaDataDecl>& getMDD() const { return getMDDByType(getType()); }
+	std::map<std::string, std::string>& getMetadata() { return mMap; }
 
 private:
 	MetaDataListType mType;

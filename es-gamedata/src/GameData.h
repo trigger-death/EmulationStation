@@ -88,11 +88,40 @@ public:
 	 */
 	void populateFolder(std::string systemId, std::string rootPath, std::vector<std::string> extensions);
 
+	/*!
+	 * Add a game to the gamelist if it doesn't already exist
+	 *
+	 * @param system	System to add game to
+	 * @param path		Full path to file
+	 * @param name		Optional name. If empty defaults to the filename without extension
+	 */
+	void addGame(const GameDataSystem& system, std::string path, std::string name = "");
+
+	/*!
+	 * Add metadata for a game if it doesn't already exist. If it does exist then it is left unchanged
+	 * even if incomplete
+	 *
+	 * @param system	System to add metadata for
+	 * @param id		Game id to add metadata for
+	 * @param tag		Metadata tag to add
+	 * @param value		Metadata value to add
+	 */
+	void addMetadata(const GameDataSystem& system, std::string id, std::string tag, std::string value);
+
 protected:
 	/*!
 	 * Create the required set of tables if they don't already exist in the database
 	 */
 	void createTables();
+
+	/*!
+	 * Check to see if a game exists
+	 *
+	 * @return true if game exists in DB, false if it does not
+	 * @param systemId	System id for game
+	 * @param gameId	Game id
+	 */
+	bool gameExists(std::string systemId, std::string gameId);
 
 protected:
 	sqlite3*								mDB;

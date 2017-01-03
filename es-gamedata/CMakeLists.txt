@@ -63,9 +63,9 @@ if(GTEST_FOUND)
 	add_test(GameData gamedata_t) 
 
 	# Make the unit tests run as part of the build
-	add_custom_command(
-		TARGET	gamedata_t
-		COMMENT "Run tests"
-		POST_BUILD COMMAND $<TARGET_FILE:gamedata_t>
-	)
+	#add_custom_command(
+	#	TARGET	gamedata_t
+	#	COMMENT "Run tests"
+	#	POST_BUILD COMMAND $<TARGET_FILE:gamedata_t>
+	#)
 endif()
