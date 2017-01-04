@@ -31,7 +31,7 @@ TEST(GameDataItem, Data) {
  * Test tags are linked to item
  */
 TEST(GameDataItem, Tags) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
 	db.addTag("rtype", "arcade", "scroller");

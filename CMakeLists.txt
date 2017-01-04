@@ -162,6 +162,7 @@ set(COMMON_LIBRARIES
     ${GTEST_BOTH_LIBRARIES}
     pugixml
     nanosvg
+    sqlite3
 )
 
 #add ALSA for Linux

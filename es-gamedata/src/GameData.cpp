@@ -12,8 +12,14 @@
 #include "pugixml/pugixml.hpp"
 #include "Util.h"
 #include "MetaData.h"
+#include "PlatformId.h"
 
 namespace fs = boost::filesystem;
+
+/*
+ * Singleton instance
+ */
+GameData	GameData::mGameData;
 
 GameData::GameData() : mIsOpen(false), mDB(NULL)
 {
@@ -85,15 +91,17 @@ void GameData::parseGameList(const GameDataSystem& system, const boost::filesyst
 			fs::path path = resolvePath(fileNode.child("path").text().get(), relativeTo, false);
 			// Get the metadata including a default name
 			std::string defaultName = path.stem().generic_string();
-			if (system.hasPlatformId(PlatformIds::ARCADE) || system.hasPlatformId(PlatformIds::NEOGEO))
-				defaultName = PlatformIds::getCleanMameName(defaultName.c_str());
 
 			addGame(system, path.generic_string(), defaultName);
 
 			MetaDataList mdl = MetaDataList::createFromXML(GAME_METADATA, fileNode, relativeTo);
 			//make sure name gets set if one didn't exist
 			if (mdl.get("name").empty())
+			{
+				if (system.hasPlatformId(PlatformIds::ARCADE) || system.hasPlatformId(PlatformIds::NEOGEO))
+					defaultName = PlatformIds::getCleanMameName(defaultName.c_str());
 				mdl.set("name", defaultName);
+			}
 
 			// Populate the metadata in the database
 			for (auto it = mdl.getMetadata().begin(); it != mdl.getMetadata().end(); ++it)
@@ -161,7 +169,14 @@ void GameData::createTables()
 
 }
 
-void GameData::populateFolder(std::string systemId, std::string rootPath, std::vector<std::string> extensions)
+void GameData::populateFolder(const GameDataSystem& system, std::string rootPath, std::vector<std::string> extensions)
+{
+	sqlite3_exec(mDB, "BEGIN TRANSACTION", NULL, NULL, NULL);
+	populateFolderInternal(system, rootPath, extensions);
+	sqlite3_exec(mDB, "END TRANSACTION", NULL, NULL, NULL);
+}
+
+void GameData::populateFolderInternal(const GameDataSystem& system, std::string rootPath, std::vector<std::string> extensions)
 {
 	const fs::path& folderPath = rootPath;
 	if( !fs::is_directory(folderPath))
@@ -185,7 +200,6 @@ void GameData::populateFolder(std::string systemId, std::string rootPath, std::v
 
 	fs::path filePath;
 	std::string extension;
-	bool isGame;
 	for (fs::directory_iterator end, dir(folderPath); dir != end; ++dir)
 	{
 		filePath = (*dir).path();
@@ -202,20 +216,20 @@ void GameData::populateFolder(std::string systemId, std::string rootPath, std::v
 		if (std::find(extensions.begin(), extensions.end(), extension) != extensions.end())
 		{
 			// It is a game
-			isGame = true;
+			std::string stem = filePath.stem().generic_string();
+			addGame(system, filePath.generic_string(), stem);
+
+			std::string name = stem;
+			if (system.hasPlatformId(PlatformIds::ARCADE) || system.hasPlatformId(PlatformIds::NEOGEO))
+				name = PlatformIds::getCleanMameName(name.c_str());
+
+			// Populate the metadata in the database
+			addMetadata(system, stem, "name", name);
+
 		}
 		else if (fs::is_directory(filePath))
 		{
-			/*
-			FileData* newFolder = new FileData(FOLDER, filePath.generic_string(), this);
-			populateFolder(newFolder);
-
-			//ignore folders that do not contain games
-			if(newFolder->getChildrenByFilename().size() == 0)
-				delete newFolder;
-			else
-				folder->addChild(newFolder);
-				*/
+			populateFolder(system, filePath.generic_string(), extensions);
 		}
 	}
 }

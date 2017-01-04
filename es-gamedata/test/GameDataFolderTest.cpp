@@ -5,7 +5,7 @@
 #include "MockGameDatabase.h"
 
 TEST(GameDataFolderTest, GetItems) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "0", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "0", "3", "0");
@@ -35,7 +35,7 @@ TEST(GameDataFolderTest, GetItems) {
  * Test that we can filter results from a query based on folder ID
  */
 TEST(GameDataFolderTest, FolderFilter) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "0", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "0", "3", "0");
@@ -62,7 +62,7 @@ TEST(GameDataFolderTest, FolderFilter) {
  * Test that we can create a new relative folder from a root folder
  */
 TEST(GameDataFolderTest, CreateRelativeFolder) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 
 	mkdir("/tmp/es-games", S_IRWXU);
@@ -78,7 +78,7 @@ TEST(GameDataFolderTest, CreateRelativeFolder) {
  * Test that we can create a new relative folder from a parent folder
  */
 TEST(GameDataFolderTest, CreateRelativeFolderParent) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 
 	mkdir("/tmp/es-games", S_IRWXU);

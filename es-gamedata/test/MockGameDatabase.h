@@ -14,7 +14,7 @@
 
 class MockGameDatabase {
 public:
-	MockGameDatabase(std::string path);
+	MockGameDatabase(std::string path = ":memory:");
 	virtual ~MockGameDatabase();
 
 	void create();

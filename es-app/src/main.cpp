@@ -19,6 +19,7 @@
 #include "ScraperCmdLine.h"
 #include <sstream>
 #include <boost/locale.hpp>
+#include "GameData.h"
 
 #ifdef WIN32
 #include <Windows.h>
@@ -227,6 +228,15 @@ int main(int argc, char* argv[])
 		LOG(LogInfo) << " ARB_texture_non_power_of_two: " << (glExts.find("ARB_texture_non_power_of_two") != std::string::npos ? "ok" : "MISSING");
 
 		window.renderLoadingScreen();
+	}
+
+	// Open the game database
+	std::string home = getHomePath();
+	std::string dbDir = home + "/.emulationstation/es.db";
+	if (!GameData::instance().openDatabase(dbDir))
+	{
+		LOG(LogError) << "Could not open database file";
+		return 1;
 	}
 
 	const char* errorMsg = NULL;

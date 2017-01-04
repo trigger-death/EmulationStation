@@ -6,7 +6,7 @@
 #include "MockGameDatabase.h"
 
 TEST(GameDataList, SingleGame) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 
@@ -26,7 +26,7 @@ TEST(GameDataList, SingleGame) {
 
 
 TEST(GameDataList, MultipleGames) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -63,7 +63,7 @@ TEST(GameDataList, MultipleGames) {
 }
 
 TEST(GameDataList, SingleGameMultipleSystems) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("1943", "nes", "~/NES/1943.zip", "", "3", "0");
@@ -84,7 +84,7 @@ TEST(GameDataList, SingleGameMultipleSystems) {
 }
 
 TEST(GameDataList, MultipleGamesMultipleSystems) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -123,7 +123,7 @@ TEST(GameDataList, MultipleGamesMultipleSystems) {
  * Query using a single tag with 'match any'
  */
 TEST(GameDataList, SingleTagAny) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -160,7 +160,7 @@ TEST(GameDataList, SingleTagAny) {
  * Query using a single tag with 'match all'
  */
 TEST(GameDataList, SingleTagAll) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -198,7 +198,7 @@ TEST(GameDataList, SingleTagAll) {
  * search on a single tag
  */
 TEST(GameDataList, MultipleTagAny) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -237,7 +237,7 @@ TEST(GameDataList, MultipleTagAny) {
  * on multiple tags
  */
 TEST(GameDataList, MultipleTagAny2) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -278,7 +278,7 @@ TEST(GameDataList, MultipleTagAny2) {
  * search on a single tag
  */
 TEST(GameDataList, MultipleTagAll) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -313,7 +313,7 @@ TEST(GameDataList, MultipleTagAll) {
  * on multiple tags
  */
 TEST(GameDataList, MultipleTagAll2) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -353,7 +353,7 @@ TEST(GameDataList, MultipleTagAll2) {
  * Query using a multiple tags with 'match any' where multiple games match
  */
 TEST(GameDataList, MultipleTagAny3) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -406,7 +406,7 @@ TEST(GameDataList, MultipleTagAny3) {
  * Query using a multiple tags with 'match all' where multiple games match
  */
 TEST(GameDataList, MultipleTagAll3) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -461,7 +461,7 @@ TEST(GameDataList, MultipleTagAll3) {
  * a system filter
  */
 TEST(GameDataList, MultipleTagAnySystem) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -512,7 +512,7 @@ TEST(GameDataList, MultipleTagAnySystem) {
  * a system filter
  */
 TEST(GameDataList, MultipleTagAllSystem) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
 	db.addGame("rtype", "arcade", "~/Mame/rtype.zip", "", "3", "0");
@@ -563,7 +563,7 @@ TEST(GameDataList, MultipleTagAllSystem) {
  * Query using based on a subfolder
  */
 TEST(GameDataList, Subfolder) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 	// All in folder '1'
 	db.addGame("game1", "arcade", "game1.zip", "1", "3", "0");

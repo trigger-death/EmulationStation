@@ -7,7 +7,7 @@
 // Test we can get the tags we set
 //
 TEST(GameDataTags, GetTags) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 
 	GameDataTags tags(db.mDB, "nes", "outrun");
@@ -28,7 +28,7 @@ TEST(GameDataTags, GetTags) {
 // Test the tags.hasTag() member
 //
 TEST(GameDataTags, HasTags) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 
 	GameDataTags tags(db.mDB, "nes", "outrun");
@@ -47,7 +47,7 @@ TEST(GameDataTags, HasTags) {
 // Test the ability to remove tags
 //
 TEST(GameDataTags, RemoveTags) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 
 	GameDataTags tags(db.mDB, "nes", "outrun");
@@ -70,7 +70,7 @@ TEST(GameDataTags, RemoveTags) {
 // Test we can replace an existing set of tags with new tags
 //
 TEST(GameDataTags, SetTags) {
-	MockGameDatabase db("/tmp/testdb.db");
+	MockGameDatabase db;
 	db.create();
 
 	GameDataTags tags(db.mDB, "nes", "outrun");

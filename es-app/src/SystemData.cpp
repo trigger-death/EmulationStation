@@ -12,6 +12,7 @@
 #include <iostream>
 #include "Settings.h"
 #include "FileSorts.h"
+#include "GameData.h"
 
 std::vector<SystemData*> SystemData::sSystemVector;
 
@@ -39,11 +40,25 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, con
 	mRootFolder = new FileData(FOLDER, mStartPath, this);
 	mRootFolder->metadata.set("name", mFullName);
 
+	// Create a GameDataSystem for populating the database
+	GameDataSystem gds(mName, mStartPath);
+
 	if(!Settings::getInstance()->getBool("ParseGamelistOnly"))
-		populateFolder(mRootFolder);
+	{
+		GameData::instance().populateFolder(gds, mStartPath, mSearchExtensions);
+		//populateFolder(mRootFolder);
+	}
 
 	if(!Settings::getInstance()->getBool("IgnoreGamelist"))
+	{
+		// Import the game list into the database
+		std::string xmlpath = getGamelistPath(false);
+		if(boost::filesystem::exists(xmlpath))
+		{
+			GameData::instance().parseGameList(gds, xmlpath);
+		}
 		parseGamelist(this);
+	}
 
 	mRootFolder->sort(FileSorts::SortTypes.at(0));
 

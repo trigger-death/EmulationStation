@@ -95,7 +95,7 @@ std::map< std::string, ElementMapType > ThemeData::sElementMap = boost::assign::
 namespace fs = boost::filesystem;
 
 #define MINIMUM_THEME_FORMAT_VERSION 3
-#define CURRENT_THEME_FORMAT_VERSION 3
+#define CURRENT_THEME_FORMAT_VERSION 4
 
 // helper
 unsigned int getHexColor(const char* str)
@@ -179,10 +179,33 @@ void ThemeData::loadFile(const std::string& path)
 	if(mVersion < MINIMUM_THEME_FORMAT_VERSION)
 		throw error << "Theme uses format version " << mVersion << ". Minimum supported version is " << MINIMUM_THEME_FORMAT_VERSION << ".";
 
+	parseVersion(root);
 	parseIncludes(root);
 	parseViews(root);
 }
 
+
+void ThemeData::parseVersion(const pugi::xml_node& root)
+{
+	ThemeException error;
+	error.setFiles(mPaths);
+
+	for(pugi::xml_node node = root.child("version"); node; node = node.next_sibling("version"))
+	{
+		// Read the minimum supported version for this section
+		if(!node.attribute("minimum"))
+			throw error << "Conditional 'version' missing \"minimum\" attribute!";
+		int minimum = node.attribute("minimum").as_int();
+		// See if our version number meets the minimum requirement
+		if (CURRENT_THEME_FORMAT_VERSION >= minimum)
+		{
+			// It does. Parse the contents
+			parseVersion(node);
+			parseIncludes(node);
+			parseViews(node);
+		}
+	}
+}
 
 void ThemeData::parseIncludes(const pugi::xml_node& root)
 {

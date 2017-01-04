@@ -13,6 +13,7 @@
 #include <iostream>
 #include <boost/filesystem.hpp>
 #include <string>
+#include "Log.h"
 #include "GameDataSystem.h"
 #include "GameDataList.h"
 #include "sqlite3.h"
@@ -47,16 +48,17 @@ enum
 	TABLE_FOLDERS_PARENT_COL
 };
 
-//
-// Temporary log code
-//
-enum LogLevel { LogError, LogWarning, LogInfo, LogDebug };
-#define LOG(level) std::cerr
-
 class GameData {
 public:
 	GameData();
 	~GameData();
+
+	/*!
+	 * Get the singleton instance of this class
+	 *
+	 * @return Singleton instance
+	 */
+	static GameData& instance() { return mGameData; };
 
 	/*!
 	 * Open or create the database file
@@ -83,10 +85,10 @@ public:
 	/*!
 	 * Populate the current game list with all games in the given directory
 	 *
-	 * @param systemId	ID of system to populate
+	 * @param system	System to populate
 	 * @param rootPath	Root path for system
 	 */
-	void populateFolder(std::string systemId, std::string rootPath, std::vector<std::string> extensions);
+	void populateFolder(const GameDataSystem& system, std::string rootPath, std::vector<std::string> extensions);
 
 	/*!
 	 * Add a game to the gamelist if it doesn't already exist
@@ -123,10 +125,21 @@ protected:
 	 */
 	bool gameExists(std::string systemId, std::string gameId);
 
+	/*!
+	 * Internal recursive function called by populateFolder()
+	 *
+	 * @param system	System to populate
+	 * @param rootPath	Root path for system
+	 */
+	void populateFolderInternal(const GameDataSystem& system, std::string rootPath, std::vector<std::string> extensions);
+
+
 protected:
 	sqlite3*								mDB;
 	bool									mIsOpen;
 	std::map<std::string, GameDataList*>	mGames;
+
+	static GameData							mGameData;
 };
 
 

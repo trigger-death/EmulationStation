@@ -8,7 +8,6 @@
 TEST(GameData, OpenDatabase) {
 	GameData	gd;
 	ASSERT_TRUE(gd.openDatabase("/tmp/testdb.db"));
-	remove("/tmp/testdb.db");
 }
 
 TEST(GameData, GetGameList) {

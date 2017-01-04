@@ -10,11 +10,13 @@
 
 MockGameDatabase::MockGameDatabase(std::string path) : mDB(nullptr), mPath(path)
 {
+	// If the path is not ":memory:" then remove any previous file
+	if (mPath != ":memory:")
+		remove(mPath.c_str());
 }
 
 MockGameDatabase::~MockGameDatabase()
 {
-	remove(mPath.c_str());
 }
 
 void MockGameDatabase::create()
