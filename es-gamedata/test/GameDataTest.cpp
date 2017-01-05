@@ -22,20 +22,7 @@ TEST(GameData, GetGameList) {
 	ASSERT_TRUE(gd.openDatabase("/tmp/testdb.db"));
 	GameDataList gdl = gd.getGameList();
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-}
-
-
-TEST(GameData, Metadata) {
-	MockGameDatabase db("/tmp/testdb.db");
-	db.create();
-	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
-	db.addMetadata("1942", "arcade", "1942", "A shooting game", "~/Images/1942.png", "~/Marquees/1942.png",
-				"~/Snapshots/1942.png", "~/Thumbnails/1942.png", "~/Videos/1942.wma", "1985", "Konami",
-				"Konami", "Vertical Shooter", "1");
-	db.close();
-
+	ASSERT_NE(gdl.folder()->items().size(), 0);
 }
 
 TEST(GameData, AddNewGame)

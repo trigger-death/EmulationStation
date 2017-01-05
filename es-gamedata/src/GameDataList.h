@@ -49,6 +49,21 @@ public:
 	void filterFolder(std::string folder);
 
 	/*!
+	 * Specify whether to flatten the folder structure into a single list or not
+	 *
+	 * @param	flat	true = flatten into a single folder
+	 * 					false = maintain folder structure
+	 */
+	void filterFlat(bool flat);
+
+	/*!
+	 * Get the current system filter
+	 *
+	 * @return Filter folder or an empty string if not set
+	 */
+	std::string getFilterSystem();
+
+	/*!
 	 * Get the folder that represents the items in our query
 	 *
 	 * @return	Folder
@@ -75,8 +90,8 @@ private:
 	sqlite3*					mDB;
 	std::string					mSystemId;
 	std::set<std::string>		mTags;
-	std::string					mFolderFilter;
 	bool						mMatchAll;
+	bool						mFlat;
 	GameDataFolder*				mFolder;
 };
 

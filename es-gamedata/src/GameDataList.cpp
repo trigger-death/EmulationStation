@@ -9,11 +9,12 @@
 #include "GameDataList.h"
 #include "GameDataItem.h"
 #include "GameDataFolder.h"
+#include "GameDataException.h"
 #include <sstream>
 #include <iostream>
 
 GameDataList::GameDataList(sqlite3* db) :
-	mDB(db), mMatchAll(false), mFolder(nullptr)
+	mDB(db), mMatchAll(false), mFolder(nullptr), mFlat(true)
 {
 }
 
@@ -29,6 +30,11 @@ void GameDataList::filterSystem(std::string systemId)
 	mFolder = nullptr;
 }
 
+std::string GameDataList::getFilterSystem()
+{
+	return mSystemId;
+}
+
 void GameDataList::filterTags(std::set<std::string> tags, bool matchAll)
 {
 	mTags = tags;
@@ -37,9 +43,9 @@ void GameDataList::filterTags(std::set<std::string> tags, bool matchAll)
 	mFolder = nullptr;
 }
 
-void GameDataList::filterFolder(std::string folder)
+void GameDataList::filterFlat(bool flat)
 {
-	mFolderFilter = folder;
+	mFlat = flat;
 	delete mFolder;
 	mFolder = nullptr;
 }
@@ -130,20 +136,51 @@ GameDataFolder* GameDataList::folder()
 		if (mTags.size() > 0)
 		{
 			if (mMatchAll)
-			{
 				query = buildMatchAllQuery();
-			}
 			else
-			{
 				query = buildMatchAnyQuery();
-			}
 		}
 		else
-		{
 			query = buildSimpleQuery();
+
+		// We build the folder structure in memory based on the results of the query
+		// rather than using the results as a recordset - this has less impact on the
+		// existing ES code that worked on XML files and the gamelists are never that
+		// huge
+		sqlite3_stmt*	q_result;
+		int result = sqlite3_prepare_v2(mDB, query.c_str(), query.size(), &q_result, NULL);
+		if (result != SQLITE_OK)
+		{
+			std::stringstream error;
+			error << "Failed to query game list folder using query: " << query << " - Error: " << error;
+			throw GameDataException(error.str());
 		}
-		// Pass the query to the folder along with the folder filter
-		mFolder = new GameDataFolder(mDB, query, mFolderFilter);
+		// Create an empty folder to start with
+		mFolder = new GameDataFolder;
+
+		// Iterate through the results and build the folder structure
+		while (sqlite3_step(q_result) == SQLITE_ROW)
+		{
+			try
+			{
+				GameDataGame* game = new GameDataGame(mDB, q_result);
+
+				// Add it to the folder. If the game path is in a subdirectory then the folder
+				// may choose to build it into a folder hierarchy
+				if (!mFlat)
+					mFolder->addGame(game);
+				else
+				{
+					// We are flattening the folder structure. Pass the game ID as the remaining
+					// path - this ensures the game is added directly to the root folder
+					mFolder->addGame(game, game->id());
+				}
+			}
+			catch (GameDataException&)
+			{
+				// Just ignore the game and continue with the next one
+			}
+		}
 	}
 	return mFolder;
 }

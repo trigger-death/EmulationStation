@@ -9,34 +9,20 @@
 #define ES_GAMEDATA_SRC_GAMEDATAFOLDER_H_
 
 #include "GameData.h"
+#include "GameDataItem.h"
+#include "GameDataGame.h"
 #include <string>
+#include <vector>
+#include <map>
 #include "sqlite3.h"
 
 class GameDataItem;
 
-class GameDataFolder {
+class GameDataFolder : public GameDataItem
+{
 public:
-	GameDataFolder(sqlite3* db, std::string gamesQuery, std::string folder);
+	GameDataFolder(std::string name="");
 	virtual ~GameDataFolder();
-
-	std::string	systemId() { return mSystemId; }
-	std::string fullPath() { return mPath; }
-	std::string name() { return mName; }
-	std::string description() { return mDescription; }
-	std::string image() { return mImage; }
-	std::string thumbnail() { return mThumbnail; }
-
-	/*!
-	 * Get or create a game folder in the database if it does not already exist
-	 * @return Folder ID or an empty string if there is an error
-	 * @param db			Database object
-	 * @param systemId		System to create folder for
-	 * @param rootPath		System root path. The game path must be the same as this or a
-	 * 						subdirectory of this
-	 * @param gamePath		Path to game including filename
-	 * @param parent		Parent folder ID or an empty string if no parent
-	 */
-	static std::string getGameFolder(sqlite3* db, std::string systemId, std::string rootPath, std::string gamePath, std::string parent, bool create = true);
 
 	/*!
 	 * Get the parent folder of this folder.
@@ -46,51 +32,30 @@ public:
 	GameDataFolder* parent();
 
 	/*!
-	 * Get the first child folder
+	 * Get the list of items in this folder
 	 *
-	 * @return First child or null if no children
+	 * @return List of items
 	 */
-	GameDataFolder*	firstChild();
+	const std::vector<GameDataItem*> items();
 
 	/*!
-	 * Get the next child folder
+	 * Add a game into the folder, building a hierarchy to match the game
+	 * subdirectory if necessary
 	 *
-	 * @return Next child or null if no more children
+	 * @param game	Game to add. This class takes ownership of the game and
+	 * 				deletes it when finished with
 	 */
-	GameDataFolder* nextChild();
+	void addGame(GameDataGame* game, boost::filesystem::path path = "");
 
 	/*!
-	 * Get the first game item in this folder
-	 *
-	 * @return First game item or null if no items
+	 * Get the folder name
 	 */
-	GameDataItem* getFirstItem();
-
-	/*!
-	 * Get the next game item in this folder
-	 *
-	 * @return Next game item or null if no more items
-	 */
-	GameDataItem* getNextItem();
+	std::string name() { return mName; }
 
 private:
-	/*!
-	 * Clear out any existing query results
-	 */
-	void resetQuery();
-
-private:
-	sqlite3* 					mDB;
-	sqlite3_stmt*				mRows;
-	GameDataItem*				mGame;
-	std::string					mQuery;
-	std::string					mSystemId;
-	std::string					mPath;
-	std::string					mName;
-	std::string					mDescription;
-	std::string					mImage;
-	std::string					mThumbnail;
-
+	std::vector<GameDataItem*>				mItems;
+	std::map<std::string, GameDataFolder*> 	mFolders;
+	std::string								mName;
 };
 
 #endif /* ES_GAMEDATA_SRC_GAMEDATAFOLDER_H_ */

@@ -12,18 +12,15 @@ TEST(GameDataList, SingleGame) {
 
 	GameDataList gdl(db.mDB);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-
 	// Check the game data
-	ASSERT_EQ(item->id(), "1942");
-	ASSERT_EQ(item->systemID(), "arcade");
-	ASSERT_EQ(item->path(), "~/Mame/1942.zip");
+	ASSERT_EQ(gdl.folder()->items().size(), 1);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "1942");
+	ASSERT_EQ(game->systemID(), "arcade");
+	ASSERT_EQ(game->path(), "~/Mame/1942.zip");
 
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
 }
-
 
 TEST(GameDataList, MultipleGames) {
 	MockGameDatabase db;
@@ -34,32 +31,26 @@ TEST(GameDataList, MultipleGames) {
 
 	GameDataList gdl(db.mDB);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-
 	// Check the game data
-	ASSERT_EQ(item->id(), "1942");
-	ASSERT_EQ(item->systemID(), "arcade");
-	ASSERT_EQ(item->path(), "~/Mame/1942.zip");
+	ASSERT_EQ(gdl.folder()->items().size(), 3);
 
-	// Make sure there is another game
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
-	ASSERT_EQ(item->systemID(), "arcade");
-	ASSERT_EQ(item->path(), "~/Mame/rtype.zip");
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "1942");
+	ASSERT_EQ(game->systemID(), "arcade");
+	ASSERT_EQ(game->path(), "~/Mame/1942.zip");
 
-	// Make sure there is another game
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	// Check the game data
-	ASSERT_EQ(item->id(), "bublbobl");
-	ASSERT_EQ(item->systemID(), "arcade");
-	ASSERT_EQ(item->path(), "~/Mame/bublbobl.zip");
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[1]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
+	ASSERT_EQ(game->systemID(), "arcade");
+	ASSERT_EQ(game->path(), "~/Mame/rtype.zip");
 
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[2]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "bublbobl");
+	ASSERT_EQ(game->systemID(), "arcade");
+	ASSERT_EQ(game->path(), "~/Mame/bublbobl.zip");
 }
 
 TEST(GameDataList, SingleGameMultipleSystems) {
@@ -71,16 +62,13 @@ TEST(GameDataList, SingleGameMultipleSystems) {
 	GameDataList gdl(db.mDB);
 	gdl.filterSystem("nes");
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-
 	// Check the game data
-	ASSERT_EQ(item->id(), "1943");
-	ASSERT_EQ(item->systemID(), "nes");
-	ASSERT_EQ(item->path(), "~/NES/1943.zip");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 1);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "1943");
+	ASSERT_EQ(game->systemID(), "nes");
+	ASSERT_EQ(game->path(), "~/NES/1943.zip");
 }
 
 TEST(GameDataList, MultipleGamesMultipleSystems) {
@@ -99,24 +87,19 @@ TEST(GameDataList, MultipleGamesMultipleSystems) {
 	GameDataList gdl(db.mDB);
 	gdl.filterSystem("c64");
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 2);
 
-	// Check the game data
-	ASSERT_EQ(item->id(), "mno");
-	ASSERT_EQ(item->systemID(), "c64");
-	ASSERT_EQ(item->path(), "~/c64/mno.zip");
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "mno");
+	ASSERT_EQ(game->systemID(), "c64");
+	ASSERT_EQ(game->path(), "~/c64/mno.zip");
 
-	// Make sure there is another game
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	// Check the game data
-	ASSERT_EQ(item->id(), "pqr");
-	ASSERT_EQ(item->systemID(), "c64");
-	ASSERT_EQ(item->path(), "~/c64/pqr.zip");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[1]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "pqr");
+	ASSERT_EQ(game->systemID(), "c64");
+	ASSERT_EQ(game->path(), "~/c64/pqr.zip");
 }
 
 /*
@@ -146,14 +129,10 @@ TEST(GameDataList, SingleTagAny) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, false);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 1);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 }
 
 /*
@@ -183,14 +162,10 @@ TEST(GameDataList, SingleTagAll) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, true);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 1);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 }
 
 /*
@@ -222,14 +197,10 @@ TEST(GameDataList, MultipleTagAny) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, false);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 1);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 }
 
 /*
@@ -262,15 +233,10 @@ TEST(GameDataList, MultipleTagAny2) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, false);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
-
+	ASSERT_EQ(gdl.folder()->items().size(), 1);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 }
 
 /*
@@ -303,9 +269,7 @@ TEST(GameDataList, MultipleTagAll) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, true);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	// Make sure there are no games
-	ASSERT_EQ(item, nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 0);
 }
 
 /*
@@ -338,15 +302,10 @@ TEST(GameDataList, MultipleTagAll2) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, true);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
-
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
-
+	ASSERT_EQ(gdl.folder()->items().size(), 1);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 }
 
 /*
@@ -383,23 +342,18 @@ TEST(GameDataList, MultipleTagAny3) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, false);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 3);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[1]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "bublbobl");
 
-	// There should be two more
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	ASSERT_EQ(item->id(), "bublbobl");
-
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	ASSERT_EQ(item->id(), "mno");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[2]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "mno");
 }
 
 /*
@@ -437,23 +391,18 @@ TEST(GameDataList, MultipleTagAll3) {
 	GameDataList gdl(db.mDB);
 	gdl.filterTags(tags, true);
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 3);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[1]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "bublbobl");
 
-	// There should be two more
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	ASSERT_EQ(item->id(), "bublbobl");
-
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	ASSERT_EQ(item->id(), "mno");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[2]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "mno");
 }
 
 /*
@@ -492,19 +441,14 @@ TEST(GameDataList, MultipleTagAnySystem) {
 	gdl.filterTags(tags, false);
 	gdl.filterSystem("arcade");
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 2);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
-
-	// There should be one more
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	ASSERT_EQ(item->id(), "bublbobl");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[1]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "bublbobl");
 }
 
 /*
@@ -544,59 +488,58 @@ TEST(GameDataList, MultipleTagAllSystem) {
 	gdl.filterTags(tags, true);
 	gdl.filterSystem("arcade");
 
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
+	ASSERT_EQ(gdl.folder()->items().size(), 2);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
 
-	// Check the game data
-	ASSERT_EQ(item->id(), "rtype");
-
-	// There should be one more
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	ASSERT_EQ(item->id(), "bublbobl");
-
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	game = dynamic_cast<GameDataGame*>(gdl.folder()->items()[1]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "bublbobl");
 }
 
-/*
- * Query using based on a subfolder
- */
-TEST(GameDataList, Subfolder) {
+TEST(GameDataList, FolderHierarchy) {
 	MockGameDatabase db;
 	db.create();
-	// All in folder '1'
-	db.addGame("game1", "arcade", "game1.zip", "1", "3", "0");
-	db.addGame("game2", "arcade", "game2.zip", "1", "3", "0");
-	db.addGame("game3", "arcade", "game3.zip", "1", "3", "0");
-	db.addGame("game4", "arcade", "game4.zip", "1", "3", "0");
-	db.addGame("game5", "arcade", "game5.zip", "1", "3", "0");
+	db.addGame("1942", "arcade", "Mame/0-9/1942.zip", "", "3", "0");
+	db.addGame("rtype", "arcade", "Mame/R/rtype.zip", "", "3", "0");
+	db.addGame("bublbobl", "arcade", "Mame/B/bublbobl.zip", "", "3", "0");
 
-	// All in folder '2'
-	db.addGame("game6", "arcade", "game6.zip", "2", "3", "0");
-	db.addGame("game7", "arcade", "game7.zip", "2", "3", "0");
-
-	// Different system
-	db.addGame("game11", "nes", "game11.zip", "3", "3", "0");
-	db.addGame("game12", "nes", "game12.zip", "3", "3", "0");
-
-	// Build the list and filter it
 	GameDataList gdl(db.mDB);
-	gdl.filterSystem("arcade");
-	gdl.filterFolder("2");
-
-	GameDataItem* item = gdl.folder()->getFirstItem();
-	ASSERT_NE(item, nullptr);
+	gdl.filterFlat(false);
 
 	// Check the game data
-	ASSERT_EQ(item->id(), "game6");
+	ASSERT_EQ(gdl.folder()->items().size(), 1);
 
-	// There should be one more
-	item = gdl.folder()->getNextItem();
-	ASSERT_NE(item, nullptr);
-	ASSERT_EQ(item->id(), "game7");
+	// Should be a folder
+	GameDataFolder* folder = dynamic_cast<GameDataFolder*>(gdl.folder()->items()[0]);
+	ASSERT_NE(folder, nullptr);
 
-	// Make sure there are no more games
-	ASSERT_EQ(gdl.folder()->getNextItem(), nullptr);
+	// Folder should contain 3 subfolders
+	ASSERT_EQ(folder->items().size(), 3);
+
+	// Each folder should contain 1 game
+	GameDataFolder* subfolder = dynamic_cast<GameDataFolder*>(folder->items()[0]);
+	ASSERT_NE(subfolder, nullptr);
+	ASSERT_EQ(subfolder->name(), "0-9");
+	ASSERT_EQ(subfolder->items().size(), 1);
+	GameDataGame* game = dynamic_cast<GameDataGame*>(subfolder->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "1942");
+
+	subfolder = dynamic_cast<GameDataFolder*>(folder->items()[1]);
+	ASSERT_NE(subfolder, nullptr);
+	ASSERT_EQ(subfolder->name(), "R");
+	ASSERT_EQ(subfolder->items().size(), 1);
+	game = dynamic_cast<GameDataGame*>(subfolder->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "rtype");
+
+	subfolder = dynamic_cast<GameDataFolder*>(folder->items()[2]);
+	ASSERT_NE(subfolder, nullptr);
+	ASSERT_EQ(subfolder->name(), "B");
+	ASSERT_EQ(subfolder->items().size(), 1);
+	game = dynamic_cast<GameDataGame*>(subfolder->items()[0]);
+	ASSERT_NE(game, nullptr);
+	ASSERT_EQ(game->id(), "bublbobl");
 }
-
