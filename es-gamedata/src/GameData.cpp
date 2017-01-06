@@ -111,9 +111,9 @@ void GameData::parseGameList(const GameDataSystem& system, const boost::filesyst
 	}
 }
 
-GameDataList GameData::getGameList()
+GameDataList* GameData::createGameList()
 {
-	return GameDataList(mDB);
+	return new GameDataList(mDB);
 }
 
 void GameData::createTables()

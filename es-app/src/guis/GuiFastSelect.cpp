@@ -2,6 +2,7 @@
 #include "ThemeData.h"
 #include "FileSorts.h"
 #include "SystemData.h"
+#include "GameDataFolder.h"
 
 static const std::string LETTERS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
 
@@ -34,7 +35,7 @@ GuiFastSelect::GuiFastSelect(Window* window, IGameListView* gamelist) : GuiCompo
 	mSortId = 0; // TODO
 	updateSortText();
 
-	mLetterId = LETTERS.find(mGameList->getCursor()->getName()[0]);
+	mLetterId = LETTERS.find(mGameList->getCursor()->name()[0]);
 	if(mLetterId == std::string::npos)
 		mLetterId = 0;
 
@@ -130,6 +131,7 @@ void GuiFastSelect::updateSortText()
 
 void GuiFastSelect::updateGameListSort()
 {
+#if 0
 	const FileData::SortType& sort = FileSorts::SortTypes.at(mSortId);
 
 	FileData* root = mGameList->getCursor()->getSystem()->getRootFolder();
@@ -137,11 +139,12 @@ void GuiFastSelect::updateGameListSort()
 
 	// notify that the root folder was sorted
 	mGameList->onFileChanged(root, FILE_SORTED);
+#endif
 }
 
 void GuiFastSelect::updateGameListCursor()
 {
-	const std::vector<FileData*>& list = mGameList->getCursor()->getParent()->getChildren();
+	const std::vector<GameDataItem*>& list = mGameList->getCursor()->parent()->items();
 
 	// only skip by letter when the sort mode is alphabetical
 	const FileData::SortType& sort = FileSorts::SortTypes.at(mSortId);
@@ -151,7 +154,7 @@ void GuiFastSelect::updateGameListCursor()
 	// find the first entry in the list that either exactly matches our target letter or is beyond our target letter
 	for(auto it = list.cbegin(); it != list.cend(); it++)
 	{
-		char check = (*it)->getName().empty() ? 'A' : (*it)->getName()[0];
+		char check = (*it)->name().empty() ? 'A' : (*it)->name()[0];
 
 		// if there's an exact match or we've passed it, set the cursor to this one
 		if(check == LETTERS[mLetterId] || (sort.ascending && check > LETTERS[mLetterId]) || (!sort.ascending && check < LETTERS[mLetterId]))

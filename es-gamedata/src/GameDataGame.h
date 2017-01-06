@@ -28,6 +28,13 @@ public:
 
 	virtual ~GameDataGame();
 
+	/*!
+	 * Get the display name for the item
+	 *
+	 * @return Display name
+	 */
+	virtual std::string name();
+
 	const std::string& id() const { return mID; }
 	const std::string& systemID() const { return mSystemID; }
 	const std::string& path() const { return mPath; }

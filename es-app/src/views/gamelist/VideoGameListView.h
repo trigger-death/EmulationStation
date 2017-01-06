@@ -9,7 +9,7 @@
 class VideoGameListView : public BasicGameListView
 {
 public:
-	VideoGameListView(Window* window, FileData* root);
+	VideoGameListView(Window* window, GameDataList* root);
 	virtual ~VideoGameListView();
 
 	virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
@@ -17,7 +17,7 @@ public:
 	virtual const char* getName() const override { return "video"; }
 
 protected:
-	virtual void launch(FileData* game) override;
+	virtual void launch(GameDataGame* game) override;
 	
 	virtual void update(int deltaTime) override;
 

@@ -6,14 +6,14 @@
 #include "SystemData.h"
 #include "Settings.h"
 
-BasicGameListView::BasicGameListView(Window* window, FileData* root)
+BasicGameListView::BasicGameListView(Window* window, GameDataList* root)
 	: ISimpleGameListView(window, root), mList(window)
 {
 	mList.setSize(mSize.x(), mSize.y() * 0.8f);
 	mList.setPosition(0, mSize.y() * 0.2f);
 	addChild(&mList);
 
-	populateList(root->getChildren());
+	populateList(root->folder()->items());
 }
 
 void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
@@ -23,7 +23,7 @@ void BasicGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme)
 	mList.applyTheme(theme, getName(), "gamelist", ALL);
 }
 
-void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
+void BasicGameListView::onFileChanged(GameDataItem* file, FileChangeType change)
 {
 	if(change == FILE_METADATA_CHANGED)
 	{
@@ -35,43 +35,45 @@ void BasicGameListView::onFileChanged(FileData* file, FileChangeType change)
 	ISimpleGameListView::onFileChanged(file, change);
 }
 
-void BasicGameListView::populateList(const std::vector<FileData*>& files)
+void BasicGameListView::populateList(const std::vector<GameDataItem*>& files)
 {
 	mList.clear();
 
-	mHeaderText.setText(files.at(0)->getSystem()->getFullName());
+	//mHeaderText.setText(files.at(0)->getSystem()->getFullName());
+	mHeaderText.setText(mRoot->getFilterSystem());
 
 	for(auto it = files.begin(); it != files.end(); it++)
 	{
-		mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+		//mList.add((*it)->getName(), *it, ((*it)->getType() == FOLDER));
+		mList.add((*it)->name(), *it, dynamic_cast<GameDataFolder*>(*it) ? true : false);
 	}
 }
 
-FileData* BasicGameListView::getCursor()
+GameDataItem* BasicGameListView::getCursor()
 {
 	return mList.getSelected();
 }
 
-void BasicGameListView::setCursor(FileData* cursor)
+void BasicGameListView::setCursor(GameDataItem* cursor)
 {
 	if(!mList.setCursor(cursor))
 	{
-		populateList(cursor->getParent()->getChildren());
+		populateList(cursor->parent()->items());
 		mList.setCursor(cursor);
 
 		// update our cursor stack in case our cursor just got set to some folder we weren't in before
-		if(mCursorStack.empty() || mCursorStack.top() != cursor->getParent())
+		if(mCursorStack.empty() || mCursorStack.top() != cursor->parent())
 		{
-			std::stack<FileData*> tmp;
-			FileData* ptr = cursor->getParent();
-			while(ptr && ptr != mRoot)
+			std::stack<GameDataItem*> tmp;
+			GameDataItem* ptr = cursor->parent();
+			while(ptr && ptr != mRoot->folder())
 			{
 				tmp.push(ptr);
-				ptr = ptr->getParent();
+				ptr = ptr->parent();
 			}
 			
 			// flip the stack and put it in mCursorStack
-			mCursorStack = std::stack<FileData*>();
+			mCursorStack = std::stack<GameDataItem*>();
 			while(!tmp.empty())
 			{
 				mCursorStack.push(tmp.top());
@@ -81,13 +83,14 @@ void BasicGameListView::setCursor(FileData* cursor)
 	}
 }
 
-void BasicGameListView::launch(FileData* game)
+void BasicGameListView::launch(GameDataGame* game)
 {
 	ViewController::get()->launch(game);
 }
 
-void BasicGameListView::remove(FileData *game)
+void BasicGameListView::remove(GameDataItem *game)
 {
+#if 0
 	boost::filesystem::remove(game->getPath());  // actually delete the file on the filesystem
 	if (getCursor() == game)                     // Select next element in list, or prev if none
 	{
@@ -106,6 +109,7 @@ void BasicGameListView::remove(FileData *game)
 	}
 	delete game;                                 // remove before repopulating (removes from parent)
 	onFileChanged(game, FILE_REMOVED);           // update the view, with game removed
+#endif
 }
 
 std::vector<HelpPrompt> BasicGameListView::getHelpPrompts()

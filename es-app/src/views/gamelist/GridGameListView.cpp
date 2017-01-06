@@ -3,26 +3,26 @@
 #include "Window.h"
 #include "views/ViewController.h"
 
-GridGameListView::GridGameListView(Window* window, FileData* root) : ISimpleGameListView(window, root),
+GridGameListView::GridGameListView(Window* window, GameDataList* root) : ISimpleGameListView(window, root),
 	mGrid(window)
 {
 	mGrid.setPosition(0, mSize.y() * 0.2f);
 	mGrid.setSize(mSize.x(), mSize.y() * 0.8f);
 	addChild(&mGrid);
 
-	populateList(root->getChildren());
+	populateList(root->folder()->items());
 }
 
-FileData* GridGameListView::getCursor()
+GameDataItem* GridGameListView::getCursor()
 {
 	return mGrid.getSelected();
 }
 
-void GridGameListView::setCursor(FileData* file)
+void GridGameListView::setCursor(GameDataItem* file)
 {
 	if(!mGrid.setCursor(file))
 	{
-		populateList(file->getParent()->getChildren());
+		populateList(file->parent()->items());
 		mGrid.setCursor(file);
 	}
 }
@@ -35,16 +35,16 @@ bool GridGameListView::input(InputConfig* config, Input input)
 	return ISimpleGameListView::input(config, input);
 }
 
-void GridGameListView::populateList(const std::vector<FileData*>& files)
+void GridGameListView::populateList(const std::vector<GameDataItem*>& files)
 {
 	mGrid.clear();
 	for(auto it = files.begin(); it != files.end(); it++)
 	{
-		mGrid.add((*it)->getName(), (*it)->getThumbnailPath(), *it);
+		//mGrid.add((*it)->name(), (*it)->getThumbnailPath(), *it);
 	}
 }
 
-void GridGameListView::launch(FileData* game)
+void GridGameListView::launch(GameDataGame* game)
 {
 	ViewController::get()->launch(game);
 }

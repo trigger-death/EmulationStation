@@ -3,7 +3,7 @@
 #include "Window.h"
 #include "animations/LambdaAnimation.h"
 
-DetailedGameListView::DetailedGameListView(Window* window, FileData* root) : 
+DetailedGameListView::DetailedGameListView(Window* window, GameDataList* root) :
 	BasicGameListView(window, root), 
 	mDescContainer(window), mDescription(window), 
 	mImage(window),
@@ -20,7 +20,7 @@ DetailedGameListView::DetailedGameListView(Window* window, FileData* root) :
 
 	mList.setPosition(mSize.x() * (0.50f + padding), mList.getPosition().y());
 	mList.setSize(mSize.x() * (0.50f - padding), mList.getSize().y());
-	mList.setAlignment(TextListComponent<FileData*>::ALIGN_LEFT);
+	mList.setAlignment(TextListComponent<GameDataItem*>::ALIGN_LEFT);
 	mList.setCursorChangedCallback([&](const CursorState& state) { updateInfoPanel(); });
 
 	// image
@@ -179,6 +179,7 @@ void DetailedGameListView::initMDValues()
 
 void DetailedGameListView::updateInfoPanel()
 {
+#if 0
 	FileData* file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
 
 	bool fadingOut;
@@ -230,9 +231,10 @@ void DetailedGameListView::updateInfoPanel()
 			comp->setAnimation(new LambdaAnimation(func, 150), 0, nullptr, fadingOut);
 		}
 	}
+#endif
 }
 
-void DetailedGameListView::launch(FileData* game)
+void DetailedGameListView::launch(GameDataGame* game)
 {
 	Eigen::Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
 	if(mImage.hasImage())

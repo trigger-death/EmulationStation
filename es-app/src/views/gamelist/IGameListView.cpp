@@ -13,8 +13,17 @@ bool IGameListView::input(InputConfig* config, Input input)
 	// select to open GuiGamelistOptions
 	if(config->isMappedTo("select", input) && input.value)
 	{
-		Sound::getFromTheme(mTheme, getName(), "menuOpen")->play();
-		mWindow->pushGui(new GuiGamelistOptions(mWindow, this->mRoot->getSystem()));
+		// If the view is filtered on system then get the system object to pass to the GUI
+		std::string systemId = mRoot->getFilterSystem();
+		if (!systemId.empty())
+		{
+			SystemData* system = SystemData::getSystem(systemId);
+			if (system)
+			{
+				Sound::getFromTheme(mTheme, getName(), "menuOpen")->play();
+				mWindow->pushGui(new GuiGamelistOptions(mWindow, system));
+			}
+		}
 		return true;
 
 	// Ctrl-R to reload a view when debugging

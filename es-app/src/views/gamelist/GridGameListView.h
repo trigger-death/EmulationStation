@@ -8,12 +8,12 @@
 class GridGameListView : public ISimpleGameListView
 {
 public:
-	GridGameListView(Window* window, FileData* root);
+	GridGameListView(Window* window, GameDataList* root);
 
 	//virtual void onThemeChanged(const std::shared_ptr<ThemeData>& theme) override;
 
-	virtual FileData* getCursor() override;
-	virtual void setCursor(FileData*) override;
+	virtual GameDataItem* getCursor() override;
+	virtual void setCursor(GameDataItem*) override;
 
 	virtual bool input(InputConfig* config, Input input) override;
 
@@ -22,8 +22,8 @@ public:
 	virtual std::vector<HelpPrompt> getHelpPrompts() override;
 
 protected:
-	virtual void populateList(const std::vector<FileData*>& files) override;
-	virtual void launch(FileData* game) override;
+	virtual void populateList(const std::vector<GameDataItem*>& files) override;
+	virtual void launch(GameDataGame* game) override;
 
-	ImageGridComponent<FileData*> mGrid;
+	ImageGridComponent<GameDataItem*> mGrid;
 };

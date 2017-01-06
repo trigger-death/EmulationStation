@@ -2,6 +2,7 @@
 #include "GuiMetaDataEd.h"
 #include "views/gamelist/IGameListView.h"
 #include "views/ViewController.h"
+#include "GameDataFolder.h"
 
 GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : GuiComponent(window), 
 	mSystem(system), 
@@ -10,7 +11,7 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 	addChild(&mMenu);
 
 	// jump to letter
-	char curChar = toupper(getGamelist()->getCursor()->getName()[0]);
+	char curChar = toupper(getGamelist()->getCursor()->name()[0]);
 	if(curChar < 'A' || curChar > 'Z')
 		curChar = 'A';
 
@@ -59,16 +60,19 @@ GuiGamelistOptions::GuiGamelistOptions(Window* window, SystemData* system) : Gui
 
 GuiGamelistOptions::~GuiGamelistOptions()
 {
+#if 0
 	// apply sort
 	FileData* root = getGamelist()->getCursor()->getSystem()->getRootFolder();
 	root->sort(*mListSort->getSelected()); // will also recursively sort children
 
 	// notify that the root folder was sorted
 	getGamelist()->onFileChanged(root, FILE_SORTED);
+#endif
 }
 
 void GuiGamelistOptions::openMetaDataEd()
 {
+#if 0
 	// open metadata editor
 	FileData* file = getGamelist()->getCursor();
 	ScraperSearchParams p;
@@ -78,6 +82,7 @@ void GuiGamelistOptions::openMetaDataEd()
 		std::bind(&IGameListView::onFileChanged, getGamelist(), file, FILE_METADATA_CHANGED), [this, file] { 
 			getGamelist()->remove(file);
 	}));
+#endif
 }
 
 void GuiGamelistOptions::jumpToLetter()
@@ -85,8 +90,8 @@ void GuiGamelistOptions::jumpToLetter()
 	char letter = mJumpToLetterList->getSelected();
 	IGameListView* gamelist = getGamelist();
 
-	// this is a really shitty way to get a list of files
-	const std::vector<FileData*>& files = gamelist->getCursor()->getParent()->getChildren();
+	// this is a really bad way to get a list of files
+	const std::vector<GameDataItem*>& files = gamelist->getCursor()->parent()->items();
 	
 	long min = 0;
 	long max = files.size() - 1;
@@ -97,10 +102,10 @@ void GuiGamelistOptions::jumpToLetter()
 		mid = ((max - min) / 2) + min;
 
 		// game somehow has no first character to check
-		if(files.at(mid)->getName().empty())
+		if(files.at(mid)->name().empty())
 			continue;
 
-		char checkLetter = toupper(files.at(mid)->getName()[0]);
+		char checkLetter = toupper(files.at(mid)->name()[0]);
 
 		if(checkLetter < letter)
 			min = mid + 1;

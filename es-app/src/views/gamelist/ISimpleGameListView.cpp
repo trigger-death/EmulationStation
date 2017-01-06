@@ -5,7 +5,7 @@
 #include "Sound.h"
 #include "Settings.h"
 
-ISimpleGameListView::ISimpleGameListView(Window* window, FileData* root) : IGameListView(window, root),
+ISimpleGameListView::ISimpleGameListView(Window* window, GameDataList* root) : IGameListView(window, root),
 	mHeaderText(window), mHeaderImage(window), mBackground(window), mThemeExtras(window)
 {
 	mHeaderText.setText("Logo Text");
@@ -42,12 +42,12 @@ void ISimpleGameListView::onThemeChanged(const std::shared_ptr<ThemeData>& theme
 	}
 }
 
-void ISimpleGameListView::onFileChanged(FileData* file, FileChangeType change)
+void ISimpleGameListView::onFileChanged(GameDataItem* file, FileChangeType change)
 {
 	// we could be tricky here to be efficient;
 	// but this shouldn't happen very often so we'll just always repopulate
-	FileData* cursor = getCursor();
-	populateList(cursor->getParent()->getChildren());
+	GameDataItem* cursor = getCursor();
+	populateList(cursor->parent()->items());
 	setCursor(cursor);
 }
 
@@ -57,17 +57,18 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 	{
 		if(config->isMappedTo("a", input))
 		{
-			FileData* cursor = getCursor();
-			if(cursor->getType() == GAME)
+			GameDataItem* cursor = getCursor();
+			GameDataGame* game = dynamic_cast<GameDataGame*>(cursor);
+			if(game)
 			{
 				Sound::getFromTheme(getTheme(), getName(), "launch")->play();
-				launch(cursor);
+				launch(game);
 			}else{
 				// it's a folder
-				if(cursor->getChildren().size() > 0)
+				if(cursor->items().size() > 0)
 				{
 					mCursorStack.push(cursor);
-					populateList(cursor->getChildren());
+					populateList(cursor->items());
 				}
 			}
 				
@@ -76,13 +77,13 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 		{
 			if(mCursorStack.size())
 			{
-				populateList(mCursorStack.top()->getParent()->getChildren());
+				populateList(mCursorStack.top()->parent()->items());
 				setCursor(mCursorStack.top());
 				mCursorStack.pop();
 				Sound::getFromTheme(getTheme(), getName(), "back")->play();
 			}else{
-				onFocusLost();
-				ViewController::get()->goToSystemView(getCursor()->getSystem());
+				//onFocusLost();
+				//ViewController::get()->goToSystemView(getCursor()->getSystem());
 			}
 
 			return true;

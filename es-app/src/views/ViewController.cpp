@@ -13,6 +13,7 @@
 #include "animations/MoveCameraAnimation.h"
 #include "animations/LambdaAnimation.h"
 #include <SDL2/SDL.h>
+#include "GameData.h"
 
 ViewController* ViewController::sInstance = NULL;
 
@@ -164,15 +165,18 @@ void ViewController::playViewTransition()
 	}
 }
 
-void ViewController::onFileChanged(FileData* file, FileChangeType change)
+void ViewController::onFileChanged(GameDataItem* file, FileChangeType change)
 {
+#if 0
 	auto it = mGameListViews.find(file->getSystem());
 	if(it != mGameListViews.end())
 		it->second->onFileChanged(file, change);
+#endif
 }
 
-void ViewController::launch(FileData* game, Eigen::Vector3f center)
+void ViewController::launch(GameDataGame* game, Eigen::Vector3f center)
 {
+#if 0
 	if(game->getType() != GAME)
 	{
 		LOG(LogError) << "tried to launch something that isn't a game";
@@ -216,6 +220,7 @@ void ViewController::launch(FileData* game, Eigen::Vector3f center)
 			this->onFileChanged(game, FILE_METADATA_CHANGED);
 		});
 	}
+#endif
 }
 
 std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* system)
@@ -245,17 +250,20 @@ std::shared_ptr<IGameListView> ViewController::getGameListView(SystemData* syste
 			// Don't break out in case any subsequent files have video
 		}
 	}
+
+	GameDataList* gameList = GameData::instance().createGameList();
+	gameList->filterSystem(system->getName());
 		
 	if (video)
 		// Create the view
-		view = std::shared_ptr<IGameListView>(new VideoGameListView(mWindow, system->getRootFolder()));
+		view = std::shared_ptr<IGameListView>(new VideoGameListView(mWindow, gameList));
 	else if(detailed)
-		view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, system->getRootFolder()));
+		view = std::shared_ptr<IGameListView>(new DetailedGameListView(mWindow, gameList));
 	else
-		view = std::shared_ptr<IGameListView>(new BasicGameListView(mWindow, system->getRootFolder()));
+		view = std::shared_ptr<IGameListView>(new BasicGameListView(mWindow, gameList));
 		
 	// uncomment for experimental "image grid" view
-	//view = std::shared_ptr<IGameListView>(new GridGameListView(mWindow, system->getRootFolder()));
+	//view = std::shared_ptr<IGameListView>(new GridGameListView(mWindow, gameList));
 
 	view->setTheme(system->getTheme());
 
@@ -361,7 +369,7 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 		{
 			bool isCurrent = (mCurrentView == it->second);
 			SystemData* system = it->first;
-			FileData* cursor = view->getCursor();
+			GameDataItem* cursor = view->getCursor();
 			mGameListViews.erase(it);
 
 			if(reloadTheme)
@@ -384,7 +392,7 @@ void ViewController::reloadGameListView(IGameListView* view, bool reloadTheme)
 
 void ViewController::reloadAll()
 {
-	std::map<SystemData*, FileData*> cursorMap;
+	std::map<SystemData*, GameDataItem*> cursorMap;
 	for(auto it = mGameListViews.begin(); it != mGameListViews.end(); it++)
 	{
 		cursorMap[it->first] = it->second->getCursor();

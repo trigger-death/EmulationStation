@@ -5,7 +5,7 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 
-VideoGameListView::VideoGameListView(Window* window, FileData* root) :
+VideoGameListView::VideoGameListView(Window* window, GameDataList* root) :
 	BasicGameListView(window, root), 
 	mDescContainer(window), mDescription(window), 
 	mMarquee(window),
@@ -23,7 +23,7 @@ VideoGameListView::VideoGameListView(Window* window, FileData* root) :
 
 	mList.setPosition(mSize.x() * (0.50f + padding), mList.getPosition().y());
 	mList.setSize(mSize.x() * (0.50f - padding), mList.getSize().y());
-	mList.setAlignment(TextListComponent<FileData*>::ALIGN_LEFT);
+	mList.setAlignment(TextListComponent<GameDataItem*>::ALIGN_LEFT);
 	mList.setCursorChangedCallback([&](const CursorState& state) { updateInfoPanel(); });
 
 	// Marquee
@@ -213,6 +213,7 @@ void VideoGameListView::initMDValues()
 
 void VideoGameListView::updateInfoPanel()
 {
+#if 0
 	FileData* file = (mList.size() == 0 || mList.isScrolling()) ? NULL : mList.getSelected();
 
 	bool fadingOut;
@@ -299,9 +300,10 @@ void VideoGameListView::updateInfoPanel()
 			comp->setAnimation(new LambdaAnimation(func, 150), 0, nullptr, fadingOut);
 		}
 	}
+#endif
 }
 
-void VideoGameListView::launch(FileData* game)
+void VideoGameListView::launch(GameDataGame* game)
 {
 	Eigen::Vector3f target(Renderer::getScreenWidth() / 2.0f, Renderer::getScreenHeight() / 2.0f, 0);
 	if(mMarquee.hasImage())

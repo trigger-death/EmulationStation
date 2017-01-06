@@ -10,7 +10,7 @@ TEST(GameData, OpenDatabase) {
 	ASSERT_TRUE(gd.openDatabase("/tmp/testdb.db"));
 }
 
-TEST(GameData, GetGameList) {
+TEST(GameData, CreateGameList) {
 	MockGameDatabase db("/tmp/testdb.db");
 	db.create();
 	db.addGame("1942", "arcade", "~/Mame/1942.zip", "", "3", "0");
@@ -20,9 +20,10 @@ TEST(GameData, GetGameList) {
 
 	// Open the test database
 	ASSERT_TRUE(gd.openDatabase("/tmp/testdb.db"));
-	GameDataList gdl = gd.getGameList();
-
-	ASSERT_NE(gdl.folder()->items().size(), 0);
+	GameDataList* gdl = gd.createGameList();
+	ASSERT_NE(gdl, nullptr);
+	ASSERT_NE(gdl->folder()->items().size(), 0);
+	delete gdl;
 }
 
 TEST(GameData, AddNewGame)

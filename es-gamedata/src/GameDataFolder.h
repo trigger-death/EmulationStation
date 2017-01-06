@@ -25,18 +25,25 @@ public:
 	virtual ~GameDataFolder();
 
 	/*!
+	 * Get the display name for the item
+	 *
+	 * @return Display name
+	 */
+	virtual std::string name() { return mName; }
+
+	/*!
 	 * Get the parent folder of this folder.
 	 *
 	 * @return 	Parent or null if this is a root folder
 	 */
-	GameDataFolder* parent();
+	virtual GameDataFolder* parent();
 
 	/*!
 	 * Get the list of items in this folder
 	 *
 	 * @return List of items
 	 */
-	const std::vector<GameDataItem*> items();
+	virtual const std::vector<GameDataItem*> items();
 
 	/*!
 	 * Add a game into the folder, building a hierarchy to match the game
@@ -46,11 +53,6 @@ public:
 	 * 				deletes it when finished with
 	 */
 	void addGame(GameDataGame* game, boost::filesystem::path path = "");
-
-	/*!
-	 * Get the folder name
-	 */
-	std::string name() { return mName; }
 
 private:
 	std::vector<GameDataItem*>				mItems;

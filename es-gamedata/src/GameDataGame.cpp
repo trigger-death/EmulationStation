@@ -42,3 +42,7 @@ GameDataGame::~GameDataGame()
 	delete mTags;
 }
 
+std::string GameDataGame::name()
+{
+	return mID;
+}

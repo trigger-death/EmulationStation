@@ -76,11 +76,11 @@ public:
 	void parseGameList(const GameDataSystem& system, const boost::filesystem::path& path);
 
 	/*!
-	 * Get a game list that can be filtered
+	 * Create a game list that can be filtered
 	 *
-	 * @return			Gamelist
+	 * @return			Gamelist. Must be deleted by the caller
 	 */
-	GameDataList getGameList();
+	GameDataList* createGameList();
 
 	/*!
 	 * Populate the current game list with all games in the given directory

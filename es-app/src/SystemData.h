@@ -42,6 +42,16 @@ public:
 
 	static std::vector<SystemData*> sSystemVector;
 
+	static SystemData* getSystem(std::string system)
+	{
+		for (auto s : sSystemVector)
+		{
+			if (s->mName == system)
+				return s;
+		}
+		return nullptr;
+	}
+
 	inline std::vector<SystemData*>::const_iterator getIterator() const { return std::find(sSystemVector.begin(), sSystemVector.end(), this); };
 	inline std::vector<SystemData*>::const_reverse_iterator getRevIterator() const { return std::find(sSystemVector.rbegin(), sSystemVector.rend(), this); };
 	
