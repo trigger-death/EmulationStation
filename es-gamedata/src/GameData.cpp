@@ -137,8 +137,8 @@ void GameData::createTables()
 		"systemid TEXT NOT NULL, " <<
 		"path TEXT, " <<
 		"rating INT DEFAULT 3, " <<
-		"playcount INT DEFAULT 0, " <<
-		"PRIMARY KEY (fileid, systemid))";
+		"playcount INT DEFAULT 0" <<
+		")";
 	if (sqlite3_exec(mDB, ss.str().c_str(), NULL, NULL, NULL))
 		LOG(LogError) << "Could not create games table: " << sqlite3_errmsg(mDB) << std::endl;
 

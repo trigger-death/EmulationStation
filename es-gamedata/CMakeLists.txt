@@ -9,6 +9,7 @@ set(GAMEDATA_HEADERS
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataFolder.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataGame.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataList.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataMetadata.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataSystem.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItem.h
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataTags.h
@@ -22,6 +23,7 @@ set(GAMEDATA_SOURCES
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataFolder.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataGame.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataList.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataMetadata.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataSystem.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataItem.cpp
 	${CMAKE_CURRENT_SOURCE_DIR}/src/GameDataTags.cpp	

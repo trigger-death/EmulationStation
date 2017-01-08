@@ -54,7 +54,8 @@ std::string GameDataList::buildMatchAnyQuery()
 {
 	// Build a query based on the system and tags
 	std::stringstream query;
-	query << "SELECT DISTINCT games.* FROM games INNER JOIN tags ON games.systemid=tags.systemid AND games.fileid=tags.fileid ";
+	query << "SELECT DISTINCT games.*,metadata.value FROM games INNER JOIN tags ON games.systemid=tags.systemid AND games.fileid=tags.fileid ";
+	query << "INNER JOIN metadata ON games.fileid=metadata.fileid AND games.systemid=metadata.systemid ";
 	// See if there is a system clause
 	if (!mSystemId.empty())
 		query << "WHERE games.systemid='" << mSystemId << "' AND ";
@@ -70,6 +71,7 @@ std::string GameDataList::buildMatchAnyQuery()
 		first = false;
 		query << "tags.tag='" << *it << "' ";
 	}
+	query << "AND metadata.tag='name' ";
 	return query.str();
 }
 
@@ -78,11 +80,12 @@ std::string GameDataList::buildMatchAllQuery()
 	// Build a query based on the system and tags
 	bool haveWhere = false;
 	std::stringstream query;
-	query << "SELECT DISTINCT games.* FROM games INNER JOIN tags ON games.systemid=tags.systemid AND games.fileid=tags.fileid ";
+	query << "SELECT DISTINCT games.*,metadata.value FROM games INNER JOIN tags ON games.systemid=tags.systemid AND games.fileid=tags.fileid ";
+	query << "INNER JOIN metadata ON games.fileid=metadata.fileid AND games.systemid=metadata.systemid ";
 	// See if there is a system clause
 	if (!mSystemId.empty())
 	{
-		query << "WHERE games.systemid='" << mSystemId << "' ";
+		query << "WHERE games.systemid='" << mSystemId << "' AND metadata.tag='name' ";
 		haveWhere = true;
 	}
 	// Now add any tags
@@ -117,11 +120,11 @@ std::string GameDataList::buildSimpleQuery()
 {
 	// Build a query based on the system
 	std::stringstream query;
-	query << "SELECT * FROM games ";
+	query << "SELECT games.*,metadata.value FROM games INNER JOIN metadata ON games.fileid=metadata.fileid AND games.systemid=metadata.systemid ";
 	// See if there is a system clause
 	if (!mSystemId.empty())
 	{
-		query << "WHERE games.systemid='" << mSystemId << "' ";
+		query << "WHERE games.systemid='" << mSystemId << "' AND metadata.tag='name'";
 	}
 	return query.str();
 }

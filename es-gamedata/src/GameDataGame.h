@@ -11,6 +11,7 @@
 #include <string>
 #include "GameDataTags.h"
 #include "GameDataItem.h"
+#include "GameDataMetadata.h"
 #include "sqlite3.h"
 
 class GameDataGame: public GameDataItem {
@@ -33,7 +34,7 @@ public:
 	 *
 	 * @return Display name
 	 */
-	virtual std::string name();
+	virtual std::string name() { return mName; };
 
 	const std::string& id() const { return mID; }
 	const std::string& systemID() const { return mSystemID; }
@@ -41,6 +42,7 @@ public:
 	GameDataTags& tags() { return *mTags; }
 	int	rating() const { return mRating; }
 	int playCount() const { return mPlayCount; }
+	GameDataMetadata& metadata() { return *mMetadata; }
 
 private:
 	std::string		mID;
@@ -48,7 +50,9 @@ private:
 	std::string		mPath;
 	int				mRating;
 	int				mPlayCount;
+	std::string		mName;
 	GameDataTags*	mTags;
+	GameDataMetadata* mMetadata;
 };
 
 #endif /* ES_GAMEDATA_SRC_GAMEDATAGAME_H_ */

@@ -57,7 +57,7 @@ SystemData::SystemData(const std::string& name, const std::string& fullName, con
 		{
 			GameData::instance().parseGameList(gds, xmlpath);
 		}
-		parseGamelist(this);
+		//parseGamelist(this);
 	}
 
 	mRootFolder->sort(FileSorts::SortTypes.at(0));
@@ -326,7 +326,8 @@ bool SystemData::loadConfig()
 		path = genericPath.generic_string();
 
 		SystemData* newSys = new SystemData(name, fullname, path, extensions, cmd, platformIds, themeFolder);
-		if(newSys->getRootFolder()->getChildrenByFilename().size() == 0)
+		if (0)
+		//if(newSys->getRootFolder()->getChildrenByFilename().size() == 0)
 		{
 			LOG(LogWarning) << "System \"" << name << "\" has no games! Ignoring it.";
 			delete newSys;
