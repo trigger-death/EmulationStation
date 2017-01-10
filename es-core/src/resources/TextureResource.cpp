@@ -6,17 +6,22 @@
 #include "Renderer.h"
 #include "Util.h"
 #include "resources/SVGResource.h"
+#include "Settings.h"
 
 std::map< TextureResource::TextureKeyType, std::weak_ptr<TextureResource> > TextureResource::sTextureMap;
-std::list< std::weak_ptr<TextureResource> > TextureResource::sTextureList;
+std::set<TextureResource*> 	TextureResource::sAllTextures;
+TextureResourceCache	TextureResource::sCache;
 
 TextureResource::TextureResource(const std::string& path, bool tile) : 
-	mTextureID(0), mPath(path), mTextureSize(Eigen::Vector2i::Zero()), mTile(tile)
+	mTextureID(0), mPath(path), mTextureSize(Eigen::Vector2i::Zero()), mTile(tile), mInitialized(false)
 {
+	sAllTextures.insert(this);
 }
 
 TextureResource::~TextureResource()
 {
+	sCache.remove(this);
+	sAllTextures.erase(sAllTextures.find(this));
 	deinit();
 }
 
@@ -31,6 +36,9 @@ void TextureResource::reload(std::shared_ptr<ResourceManager>& rm)
 	{
 		const ResourceData& data = rm->getFileData(mPath);
 		initFromMemory((const char*)data.ptr.get(), data.length);
+
+		// Mark it as used in the cache
+		sCache.add(this);
 	}
 }
 
@@ -54,6 +62,9 @@ void TextureResource::initFromPixels(const unsigned char* dataRGBA, size_t width
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
 
 	mTextureSize << width, height;
+
+	// The initialized flag remains true even if the texture is unloaded
+	mInitialized = true;
 }
 
 void TextureResource::initFromMemory(const char* data, size_t length)
@@ -66,6 +77,10 @@ void TextureResource::initFromMemory(const char* data, size_t length)
 		LOG(LogError) << "Could not initialize texture from memory, invalid data!  (file path: " << mPath << ", data ptr: " << (size_t)data << ", reported size: " << length << ")";
 		return;
 	}
+
+	// If we have a texture memory limit then make sure we have room for the next texture
+	// by freeing the oldest item in the cache
+	makeRoomForTexture(width, height);
 
 	initFromPixels(imageRGBA.data(), width, height);
 }
@@ -89,14 +104,19 @@ bool TextureResource::isTiled() const
 	return mTile;
 }
 
-void TextureResource::bind() const
+void TextureResource::bind()
 {
+	if (mTextureID == 0)
+	{
+		// Attempt to reload this texture
+		reload(ResourceManager::getInstance());
+	}
+	// Bind the texture
 	if(mTextureID != 0)
 		glBindTexture(GL_TEXTURE_2D, mTextureID);
 	else
-		LOG(LogError) << "Tried to bind uninitialized texture!";
+		LOG(LogError) << "Could not load and bind texture";
 }
-
 
 std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile)
 {
@@ -128,7 +148,6 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 		// probably
 		// don't add it to our map because 2 svgs might be rasterized at different sizes
 		tex = std::shared_ptr<SVGResource>(new SVGResource(key.first, tile));
-		sTextureList.push_back(tex); // add it to our list though
 		rm->addReloadable(tex);
 		tex->reload(rm);
 		return tex;
@@ -136,7 +155,6 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 		// normal texture
 		tex = std::shared_ptr<TextureResource>(new TextureResource(key.first, tile));
 		sTextureMap[key] = std::weak_ptr<TextureResource>(tex);
-		sTextureList.push_back(tex);
 		rm->addReloadable(tex);
 		tex->reload(ResourceManager::getInstance());
 		return tex;
@@ -145,7 +163,7 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 
 bool TextureResource::isInitialized() const
 {
-	return mTextureID != 0;
+	return mInitialized;
 }
 
 size_t TextureResource::getMemUsage() const
@@ -158,21 +176,85 @@ size_t TextureResource::getMemUsage() const
 
 size_t TextureResource::getTotalMemUsage()
 {
-	size_t total = 0;
-
-	auto it = sTextureList.begin();
-	while(it != sTextureList.end())
+	size_t size = 0;
+	for (auto txt : sAllTextures)
 	{
-		if((*it).expired())
-		{
-			// remove expired textures from the list
-			it = sTextureList.erase(it);
-			continue;
-		}
-
-		total += (*it).lock()->getMemUsage();
-		it++;
+		if (txt->mTextureID != 0)
+			size += txt->getMemUsage();
 	}
+	return size;
+}
 
-	return total;
+size_t TextureResource::getTotalTextureSize()
+{
+	size_t size = 0;
+	for (auto txt : sAllTextures)
+		size += txt->mTextureSize.x() * txt->mTextureSize.y() * 4;
+	return size;
+}
+
+void TextureResource::makeRoomForTexture(int width, int height)
+{
+	size_t size = getTotalMemUsage();
+	size_t tex_size = width * height * 4;
+	size_t total = size + tex_size;
+	TextureResource* purge = nullptr;
+
+	size_t max_texture = (size_t)Settings::getInstance()->getInt("MaxVRAM") * 1024 * 1024;
+
+	while ((total > max_texture) && ((purge = sCache.purgeOldest()) != nullptr))
+	{
+		// Just check it's still loaded
+		if (purge->mTextureID != 0)
+		{
+			total -= purge->mTextureSize.x() * purge->mTextureSize.y() * 4;
+			purge->unload(ResourceManager::getInstance());
+		}
+	}
+}
+
+TextureResourceCache::TextureResourceCache()
+{
+}
+
+TextureResourceCache::~TextureResourceCache()
+{
+}
+
+void TextureResourceCache::add(TextureResource* tex)
+{
+	// If it's in the cache then we want to remove it from it's current location
+	remove(tex);
+	// Add it to the front of the cache
+	mCacheEntries.push_front(tex);
+	mCacheLookup[tex] = mCacheEntries.begin();
+}
+
+void TextureResourceCache::remove(TextureResource* tex)
+{
+	// Find the entry in the list
+	auto it = mCacheLookup.find(tex);
+	if (it != mCacheLookup.end())
+	{
+		// Remove the list entry
+		mCacheEntries.erase((*it).second);
+		// And the lookup
+		mCacheLookup.erase(it);
+	}
+}
+
+TextureResource* TextureResourceCache::purgeOldest()
+{
+	// Pop the oldest one off the back
+	TextureResource* tex = nullptr;
+	if (mCacheEntries.size() > 0)
+	{
+		tex = mCacheEntries.back();
+		mCacheEntries.pop_back();
+		// Remove it from the lookup as well
+		auto it = mCacheLookup.find(tex);
+		if (it != mCacheLookup.end())
+			mCacheLookup.erase(it);
+	}
+	return tex;
 }
