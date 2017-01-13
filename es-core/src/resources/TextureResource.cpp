@@ -14,46 +14,52 @@ std::set<TextureResource*> 	TextureResource::sAllTextures;
 TextureResource::TextureResource(const std::string& path, bool tile)
 {
 	// Create a texture data object for this texture
-	mTextureData = std::shared_ptr<TextureData>(new TextureData(tile));
+	std::shared_ptr<TextureData> data = sTextureDataManager.add(this, tile);
 	if (!path.empty())
-		mTextureData->initFromPath(path);
+		data->initFromPath(path);
 	sAllTextures.insert(this);
 }
 
 TextureResource::~TextureResource()
 {
+	sTextureDataManager.remove(this);
 	sAllTextures.erase(sAllTextures.find(this));
 }
 
 void TextureResource::initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height)
 {
-	mTextureData->releaseVRAM();
-	mTextureData->releaseRAM();
-	mTextureData->initFromRGBA(dataRGBA, width, height);
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+	data->releaseVRAM();
+	data->releaseRAM();
+	data->initFromRGBA(dataRGBA, width, height);
 }
 
 void TextureResource::initFromMemory(const char* data, size_t length)
 {
-	mTextureData->releaseVRAM();
-	mTextureData->releaseRAM();
-	mTextureData->initImageFromMemory((const unsigned char*)data, length);
+	std::shared_ptr<TextureData> textureData = sTextureDataManager.get(this);
+	textureData->releaseVRAM();
+	textureData->releaseRAM();
+	textureData->initImageFromMemory((const unsigned char*)data, length);
 }
 
 const Eigen::Vector2i TextureResource::getSize() const
 {
 	Eigen::Vector2i ret;
-	ret << mTextureData->width(), mTextureData->height();
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+	ret << data->width(), data->height();
 	return ret;
 }
 
 bool TextureResource::isTiled() const
 {
-	return mTextureData->tiled();
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+	return data->tiled();
 }
 
 void TextureResource::bind()
 {
-	mTextureData->uploadAndBind();
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+	data->uploadAndBind();
 }
 
 std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile)
@@ -79,7 +85,8 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 	// need to create it
 	std::shared_ptr<TextureResource> tex;
 	tex = std::shared_ptr<TextureResource>(new TextureResource(key.first, tile));
-	tex->mTextureData->load();
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(tex.get());
+	data->load();
 
 	// is it an SVG?
 	if(key.first.substr(key.first.size() - 4, std::string::npos) != ".svg")
@@ -93,14 +100,16 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 // For scalable source images in textures we want to set the resolution to rasterize at
 void TextureResource::rasterizeAt(size_t width, size_t height)
 {
-	mTextureData->setSourceSize((float)width, (float)height);
-	mTextureData->load();
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+	data->setSourceSize((float)width, (float)height);
+	data->load();
 }
 
 Eigen::Vector2f TextureResource::getSourceImageSize() const
 {
 	Eigen::Vector2f ret;
-	ret << mTextureData->sourceWidth(), mTextureData->sourceHeight();
+	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+	ret << data->sourceWidth(), data->sourceHeight();
 	return ret;
 }
 

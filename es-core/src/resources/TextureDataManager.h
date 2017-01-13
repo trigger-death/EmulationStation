@@ -28,16 +28,16 @@ public:
 	TextureDataManager();
 	~TextureDataManager();
 
-	void add(TextureResource* key, std::shared_ptr<TextureData> data);
+	std::shared_ptr<TextureData> add(const TextureResource* key, bool tiled);
 
 	// The texturedata being removed may be loading in a different thread. However it will
 	// be referenced by a smart point so we only need to remove it from our array and it
 	// will be deleted when the other thread has finished with it
-	void remove(TextureResource* key);
+	void remove(const TextureResource* key);
 
-	std::shared_ptr<TextureData> get(TextureResource* key);
+	std::shared_ptr<TextureData> get(const TextureResource* key);
 
 private:
-	std::map<TextureResource*, std::shared_ptr<TextureData> > mTextures;
+	std::map<const TextureResource*, std::shared_ptr<TextureData> > mTextures;
 };
 

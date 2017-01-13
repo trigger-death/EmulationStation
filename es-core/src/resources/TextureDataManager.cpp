@@ -8,19 +8,21 @@ TextureDataManager::~TextureDataManager()
 {
 }
 
-void TextureDataManager::add(TextureResource* key, std::shared_ptr<TextureData> data)
+std::shared_ptr<TextureData> TextureDataManager::add(const TextureResource* key, bool tiled)
 {
+	std::shared_ptr<TextureData> data(new TextureData(tiled));
 	mTextures[key] = data;
+	return data;
 }
 
-void TextureDataManager::remove(TextureResource* key)
+void TextureDataManager::remove(const TextureResource* key)
 {
 	auto it = mTextures.find(key);
 	if (it != mTextures.end())
 		mTextures.erase(it);
 }
 
-std::shared_ptr<TextureData> TextureDataManager::get(TextureResource* key)
+std::shared_ptr<TextureData> TextureDataManager::get(const TextureResource* key)
 {
 	std::shared_ptr<TextureData> tex;
 

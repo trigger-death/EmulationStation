@@ -57,7 +57,6 @@ protected:
 	virtual void reload(std::shared_ptr<ResourceManager>& rm) { };
 
 private:
-	std::shared_ptr<TextureData>	mTextureData;
 	static TextureDataManager		sTextureDataManager;
 
 	typedef std::pair<std::string, bool> TextureKeyType;
