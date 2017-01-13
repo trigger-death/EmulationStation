@@ -6,7 +6,6 @@
 #include "Renderer.h"
 #include "ThemeData.h"
 #include "Util.h"
-#include "resources/SVGResource.h"
 
 Eigen::Vector2i ImageComponent::getTextureSize() const
 {
@@ -37,9 +36,7 @@ void ImageComponent::resize()
 	if(!mTexture)
 		return;
 
-	SVGResource* svg = dynamic_cast<SVGResource*>(mTexture.get());
-
-	const Eigen::Vector2f textureSize = svg ? svg->getSourceImageSize() : Eigen::Vector2f((float)mTexture->getSize().x(), (float)mTexture->getSize().y());
+	const Eigen::Vector2f textureSize = mTexture->getSourceImageSize();
 	if(textureSize.isZero())
 		return;
 
@@ -90,12 +87,8 @@ void ImageComponent::resize()
 			}
 		}
 	}
-
-	if(svg)
-	{
-		// mSize.y() should already be rounded
-		svg->rasterizeAt((int)round(mSize.x()), (int)round(mSize.y()));
-	}
+	// mSize.y() should already be rounded
+	mTexture->rasterizeAt((int)round(mSize.x()), (int)round(mSize.y()));
 
 	onSizeChanged();
 }

@@ -1,0 +1,223 @@
+#include "resources/TextureData.h"
+#include "resources/ResourceManager.h"
+#include "Log.h"
+#include "ImageIO.h"
+#include "string.h"
+#include "Util.h"
+#include "nanosvg/nanosvg.h"
+#include "nanosvg/nanosvgrast.h"
+#include <vector>
+
+#define DPI 96
+
+TextureData::TextureData(bool tile) : mTile(tile), mTextureID(0), mDataRGBA(nullptr), mScalable(false),
+									  mWidth(0), mHeight(0), mSourceWidth(0.0f), mSourceHeight(0.0f)
+{
+}
+
+TextureData::~TextureData()
+{
+}
+
+void TextureData::initFromPath(const std::string& path)
+{
+	// Just set the path. It will be loaded later
+	mPath = path;
+}
+
+bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length)
+{
+	// If already initialised then don't read again
+	if (mDataRGBA)
+		return true;
+
+	// nsvgParse excepts a modifiable, null-terminated string
+	char* copy = (char*)malloc(length + 1);
+	assert(copy != NULL);
+	memcpy(copy, fileData, length);
+	copy[length] = '\0';
+
+	NSVGimage* svgImage = nsvgParse(copy, "px", DPI);
+	free(copy);
+	if (!svgImage)
+	{
+		LOG(LogError) << "Error parsing SVG image.";
+		return false;
+	}
+
+	// We want to rasterise this texture at a specific resolution. If the source size
+	// variables are set then use them otherwise set them from the parsed file
+	if ((mSourceWidth == 0.0f) && (mSourceHeight == 0.0f))
+	{
+		mSourceWidth = svgImage->width;
+		mSourceHeight = svgImage->height;
+	}
+	mWidth = (size_t)round(mSourceWidth);
+	mHeight = (size_t)round(mSourceHeight);
+
+	if (mWidth == 0)
+	{
+		// auto scale width to keep aspect
+		mWidth = (size_t)round(((float)mHeight / svgImage->height) * svgImage->width);
+	}
+	else if (mHeight == 0)
+	{
+		// auto scale height to keep aspect
+		mHeight = (size_t)round(((float)mWidth / svgImage->width) * svgImage->height);
+	}
+
+	mDataRGBA = new unsigned char[mWidth * mHeight * 4];
+
+	NSVGrasterizer* rast = nsvgCreateRasterizer();
+	nsvgRasterize(rast, svgImage, 0, 0, mHeight / svgImage->height, mDataRGBA, mWidth, mHeight, mWidth * 4);
+	nsvgDeleteRasterizer(rast);
+
+	ImageIO::flipPixelsVert(mDataRGBA, mWidth, mHeight);
+	mScalable = true;
+
+	return true;
+}
+
+bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t length)
+{
+	size_t width, height;
+
+	// If already initialised then don't read again
+	if (mDataRGBA)
+		return true;
+
+	std::vector<unsigned char> imageRGBA = ImageIO::loadFromMemoryRGBA32((const unsigned char*)(fileData), length, width, height);
+	if (imageRGBA.size() == 0)
+	{
+		LOG(LogError) << "Could not initialize texture from memory, invalid data!  (file path: " << mPath << ", data ptr: " << (size_t)fileData << ", reported size: " << length << ")";
+		return false;
+	}
+
+	mSourceWidth = width;
+	mSourceHeight = height;
+	mScalable = false;
+
+	return initFromRGBA(imageRGBA.data(), width, height);
+}
+
+bool TextureData::initFromRGBA(const unsigned char* dataRGBA, size_t width, size_t height)
+{
+	// If already initialised then don't read again
+	if (mDataRGBA)
+		return true;
+
+	// Take a copy
+	mDataRGBA = new unsigned char[width * height * 4];
+	memcpy(mDataRGBA, dataRGBA, width * height * 4);
+	mWidth = width;
+	mHeight = height;
+	return true;
+}
+
+bool TextureData::load()
+{
+	bool retval = false;
+
+	// If we already have data then we're already loaded
+	if (mDataRGBA)
+		return true;
+
+	// Need to load. See if there is a file
+	if (!mPath.empty())
+	{
+		std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
+		const ResourceData& data = rm->getFileData(mPath);
+		// is it an SVG?
+		if (mPath.substr(mPath.size() - 4, std::string::npos) == ".svg")
+			retval = initSVGFromMemory((const unsigned char*)data.ptr.get(), data.length);
+		else
+			retval = initImageFromMemory((const unsigned char*)data.ptr.get(), data.length);
+	}
+	return retval;
+}
+
+bool TextureData::uploadAndBind()
+{
+	// See if it's already been uploaded
+	if (mTextureID != 0)
+	{
+		glBindTexture(GL_TEXTURE_2D, mTextureID);
+	}
+	else
+	{
+		// Make sure we're ready to upload
+		if ((mWidth == 0) || (mHeight == 0) || (mDataRGBA == nullptr))
+			return false;
+		//now for the openGL texture stuff
+		glGenTextures(1, &mTextureID);
+		glBindTexture(GL_TEXTURE_2D, mTextureID);
+
+		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, mWidth, mHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, mDataRGBA);
+
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+		const GLint wrapMode = mTile ? GL_REPEAT : GL_CLAMP_TO_EDGE;
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapMode);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapMode);
+	}
+	return true;
+}
+
+void TextureData::releaseVRAM()
+{
+	if (mTextureID != 0)
+	{
+		glDeleteTextures(1, &mTextureID);
+		mTextureID = 0;
+	}
+}
+
+void TextureData::releaseRAM()
+{
+	delete[] mDataRGBA;
+	mDataRGBA = 0;
+}
+
+size_t TextureData::width()
+{
+	if (mWidth == 0)
+		load();
+	return mWidth;
+}
+
+size_t TextureData::height()
+{
+	if (mHeight == 0)
+		load();
+	return mHeight;
+}
+
+float TextureData::sourceWidth()
+{
+	if (mSourceWidth == 0)
+		load();
+	return mSourceWidth;
+}
+
+float TextureData::sourceHeight()
+{
+	if (mSourceHeight == 0)
+		load();
+	return mSourceHeight;
+}
+
+void TextureData::setSourceSize(float width, float height)
+{
+	if (mScalable)
+	{
+		if ((mSourceWidth != width) || (mSourceHeight != height))
+		{
+			mSourceWidth = width;
+			mSourceHeight = height;
+			releaseVRAM();
+			releaseRAM();
+		}
+	}
+}
+
