@@ -11,21 +11,6 @@
 #include "resources/TextureDataManager.h"
 #include GLHEADER
 
-class TextureResourceCache
-{
-public:
-	TextureResourceCache();
-	~TextureResourceCache();
-
-	void add(TextureResource* tex);
-	void remove(TextureResource* tex);
-	TextureResource* purgeOldest();
-
-private:
-	std::list<TextureResource*>											mCacheEntries;
-	std::map<TextureResource*, std::list<TextureResource*>::iterator> 	mCacheLookup;
-};
-
 // An OpenGL texture.
 // Automatically recreates the texture with renderer deinit/reinit.
 class TextureResource : public IReloadable
@@ -47,7 +32,6 @@ public:
 	const Eigen::Vector2i getSize() const;
 	void bind();
 
-	size_t getMemUsage() const; // returns an approximation of the VRAM used by this texture (in bytes)
 	static size_t getTotalMemUsage(); // returns an approximation of total VRAM used by textures (in bytes)
 	static size_t getTotalTextureSize(); // returns the number of bytes that would be used if all textures were in memory
 
@@ -57,7 +41,15 @@ protected:
 	virtual void reload(std::shared_ptr<ResourceManager>& rm) { };
 
 private:
+	// mTextureData is used for textures that are not loaded from a file - these ones
+	// are permanently allocated and cannot be loaded and unloaded based on resources
+	std::shared_ptr<TextureData>		mTextureData;
+
+	// The texture data manager manages loading and unloading of filesystem based textures
 	static TextureDataManager		sTextureDataManager;
+
+	Eigen::Vector2i					mSize;
+	Eigen::Vector2f					mSourceSize;
 
 	typedef std::pair<std::string, bool> TextureKeyType;
 	static std::map< TextureKeyType, std::weak_ptr<TextureResource> > sTextureMap; // map of textures, used to prevent duplicate textures

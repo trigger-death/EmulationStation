@@ -36,8 +36,18 @@ public:
 	void remove(const TextureResource* key);
 
 	std::shared_ptr<TextureData> get(const TextureResource* key);
+	void bind(const TextureResource* key);
+
+	// Get the total size of all textures managed by this object, loaded and unloaded in bytes
+	size_t	getTotalSize();
+	// Get the total size of all committed textures (in VRAM) in bytes
+	size_t	getCommittedSize();
 
 private:
-	std::map<const TextureResource*, std::shared_ptr<TextureData> > mTextures;
+	void load(std::shared_ptr<TextureData> tex);
+
+	std::list<std::shared_ptr<TextureData> >												mTextures;
+	std::map<const TextureResource*, std::list<std::shared_ptr<TextureData> >::iterator > 	mTextureLookup;
+	std::shared_ptr<TextureData>															mBlank;
 };
 

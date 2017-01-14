@@ -11,43 +11,60 @@ TextureDataManager		TextureResource::sTextureDataManager;
 std::map< TextureResource::TextureKeyType, std::weak_ptr<TextureResource> > TextureResource::sTextureMap;
 std::set<TextureResource*> 	TextureResource::sAllTextures;
 
-TextureResource::TextureResource(const std::string& path, bool tile)
+TextureResource::TextureResource(const std::string& path, bool tile) : mTextureData(nullptr)
 {
 	// Create a texture data object for this texture
-	std::shared_ptr<TextureData> data = sTextureDataManager.add(this, tile);
 	if (!path.empty())
+	{
+		// If there is a path then used the texture manager to manage the texture data
+		std::shared_ptr<TextureData> data = sTextureDataManager.add(this, tile);
 		data->initFromPath(path);
+		mSize << data->width(), data->height();
+		mSourceSize << data->sourceWidth(), data->sourceHeight();
+	}
+	else
+	{
+		// Create a texture managed by this class because it cannot be dynamically loaded and unloaded
+		mTextureData = std::shared_ptr<TextureData>(new TextureData(tile));
+	}
 	sAllTextures.insert(this);
 }
 
 TextureResource::~TextureResource()
 {
-	sTextureDataManager.remove(this);
+	if (mTextureData == nullptr)
+		sTextureDataManager.remove(this);
+
 	sAllTextures.erase(sAllTextures.find(this));
 }
 
 void TextureResource::initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height)
 {
-	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
-	data->releaseVRAM();
-	data->releaseRAM();
-	data->initFromRGBA(dataRGBA, width, height);
+	// This is only valid if we have a local texture data object
+	assert(mTextureData != nullptr);
+	mTextureData->releaseVRAM();
+	mTextureData->releaseRAM();
+	mTextureData->initFromRGBA(dataRGBA, width, height);
+	// Cache the image dimensions
+	mSize << width, height;
+	mSourceSize << mTextureData->sourceWidth(), mTextureData->sourceHeight();
 }
 
 void TextureResource::initFromMemory(const char* data, size_t length)
 {
-	std::shared_ptr<TextureData> textureData = sTextureDataManager.get(this);
-	textureData->releaseVRAM();
-	textureData->releaseRAM();
-	textureData->initImageFromMemory((const unsigned char*)data, length);
+	// This is only valid if we have a local texture data object
+	assert(mTextureData != nullptr);
+	mTextureData->releaseVRAM();
+	mTextureData->releaseRAM();
+	mTextureData->initImageFromMemory((const unsigned char*)data, length);
+	// Get the size from the texture data
+	mSize << mTextureData->width(), mTextureData->height();
+	mSourceSize << mTextureData->sourceWidth(), mTextureData->sourceHeight();
 }
 
 const Eigen::Vector2i TextureResource::getSize() const
 {
-	Eigen::Vector2i ret;
-	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
-	ret << data->width(), data->height();
-	return ret;
+	return mSize;
 }
 
 bool TextureResource::isTiled() const
@@ -58,8 +75,7 @@ bool TextureResource::isTiled() const
 
 void TextureResource::bind()
 {
-	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
-	data->uploadAndBind();
+	sTextureDataManager.bind(this);
 }
 
 std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile)
@@ -86,7 +102,6 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 	std::shared_ptr<TextureResource> tex;
 	tex = std::shared_ptr<TextureResource>(new TextureResource(key.first, tile));
 	std::shared_ptr<TextureData> data = sTextureDataManager.get(tex.get());
-	data->load();
 
 	// is it an SVG?
 	if(key.first.substr(key.first.size() - 4, std::string::npos) != ".svg")
@@ -101,16 +116,13 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 void TextureResource::rasterizeAt(size_t width, size_t height)
 {
 	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+	mSourceSize << (float)width, (float)height;
 	data->setSourceSize((float)width, (float)height);
-	data->load();
 }
 
 Eigen::Vector2f TextureResource::getSourceImageSize() const
 {
-	Eigen::Vector2f ret;
-	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
-	ret << data->sourceWidth(), data->sourceHeight();
-	return ret;
+	return mSourceSize;
 }
 
 bool TextureResource::isInitialized() const
@@ -118,64 +130,30 @@ bool TextureResource::isInitialized() const
 	return true;
 }
 
-size_t TextureResource::getMemUsage() const
-{
-	return 0;
-}
-
 size_t TextureResource::getTotalMemUsage()
 {
-	return 0;
+	size_t total = 0;
+	// Count up all textures that manage their own texture data
+	for (auto tex : sAllTextures)
+	{
+		if (tex->mTextureData != nullptr)
+			total += tex->mTextureData->getVRAMUsage();
+	}
+	// Now get the committed memory from the manager
+	total += sTextureDataManager.getCommittedSize();
+	return total;
 }
 
 size_t TextureResource::getTotalTextureSize()
 {
-	return 0;
-}
-
-
-TextureResourceCache::TextureResourceCache()
-{
-}
-
-TextureResourceCache::~TextureResourceCache()
-{
-}
-
-void TextureResourceCache::add(TextureResource* tex)
-{
-	// If it's in the cache then we want to remove it from it's current location
-	remove(tex);
-	// Add it to the front of the cache
-	mCacheEntries.push_front(tex);
-	mCacheLookup[tex] = mCacheEntries.begin();
-}
-
-void TextureResourceCache::remove(TextureResource* tex)
-{
-	// Find the entry in the list
-	auto it = mCacheLookup.find(tex);
-	if (it != mCacheLookup.end())
+	size_t total = 0;
+	// Count up all textures that manage their own texture data
+	for (auto tex : sAllTextures)
 	{
-		// Remove the list entry
-		mCacheEntries.erase((*it).second);
-		// And the lookup
-		mCacheLookup.erase(it);
+		if (tex->mTextureData != nullptr)
+			total += tex->getSize().x() * tex->getSize().y() * 4;
 	}
-}
-
-TextureResource* TextureResourceCache::purgeOldest()
-{
-	// Pop the oldest one off the back
-	TextureResource* tex = nullptr;
-	if (mCacheEntries.size() > 0)
-	{
-		tex = mCacheEntries.back();
-		mCacheEntries.pop_back();
-		// Remove it from the lookup as well
-		auto it = mCacheLookup.find(tex);
-		if (it != mCacheLookup.end())
-			mCacheLookup.erase(it);
-	}
-	return tex;
+	// Now get the total memory from the manager
+	total += sTextureDataManager.getTotalSize();
+	return total;
 }

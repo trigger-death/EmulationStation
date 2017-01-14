@@ -17,12 +17,20 @@ TextureData::TextureData(bool tile) : mTile(tile), mTextureID(0), mDataRGBA(null
 
 TextureData::~TextureData()
 {
+	delete[] mDataRGBA;
+	mDataRGBA = 0;
 }
 
 void TextureData::initFromPath(const std::string& path)
 {
 	// Just set the path. It will be loaded later
 	mPath = path;
+	// Only textures with paths are reloadable
+	mReloadable = true;
+	// Load it so we can read the width/height
+	load();
+	// Also bind it to transfer from RAM to VRAM
+	uploadAndBind();
 }
 
 bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length)
@@ -73,7 +81,6 @@ bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length
 	nsvgDeleteRasterizer(rast);
 
 	ImageIO::flipPixelsVert(mDataRGBA, mWidth, mHeight);
-	mScalable = true;
 
 	return true;
 }
@@ -129,11 +136,21 @@ bool TextureData::load()
 		const ResourceData& data = rm->getFileData(mPath);
 		// is it an SVG?
 		if (mPath.substr(mPath.size() - 4, std::string::npos) == ".svg")
+		{
+			mScalable = true;
 			retval = initSVGFromMemory((const unsigned char*)data.ptr.get(), data.length);
+		}
 		else
 			retval = initImageFromMemory((const unsigned char*)data.ptr.get(), data.length);
 	}
 	return retval;
+}
+
+bool TextureData::isLoaded()
+{
+	if (mDataRGBA || (mTextureID != 0))
+		return true;
+	return false;
 }
 
 bool TextureData::uploadAndBind()
@@ -145,6 +162,12 @@ bool TextureData::uploadAndBind()
 	}
 	else
 	{
+		// Load it if necessary
+		if (!mDataRGBA)
+		{
+			if (!load())
+				return false;
+		}
 		// Make sure we're ready to upload
 		if ((mWidth == 0) || (mHeight == 0) || (mDataRGBA == nullptr))
 			return false;
@@ -175,8 +198,11 @@ void TextureData::releaseVRAM()
 
 void TextureData::releaseRAM()
 {
-	delete[] mDataRGBA;
-	mDataRGBA = 0;
+	if (mReloadable)
+	{
+		delete[] mDataRGBA;
+		mDataRGBA = 0;
+	}
 }
 
 size_t TextureData::width()
@@ -221,3 +247,10 @@ void TextureData::setSourceSize(float width, float height)
 	}
 }
 
+size_t TextureData::getVRAMUsage()
+{
+	if (mTextureID != 0)
+		return mWidth * mHeight * 4;
+	else
+		return 0;
+}

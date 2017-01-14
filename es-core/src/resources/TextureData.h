@@ -24,6 +24,8 @@ public:
 	// Read the data into memory if necessary
 	bool load();
 
+	bool isLoaded();
+
 	// Upload the texture to VRAM if necessary and bind. Returns true if bound ok or
 	// false if either not loaded
 	bool uploadAndBind();
@@ -33,6 +35,9 @@ public:
 
 	// Release the texture from conventional RAM
 	void releaseRAM();
+
+	// Get the amount of VRAM currenty used by this texture
+	size_t getVRAMUsage();
 
 	size_t width();
 	size_t height();
@@ -52,4 +57,5 @@ private:
 	float			mSourceWidth;
 	float			mSourceHeight;
 	bool			mScalable;
+	bool			mReloadable;
 };
