@@ -19,12 +19,15 @@ public:
 	~TextureLoader();
 
 	void load(std::shared_ptr<TextureData> textureData);
+	void remove(std::shared_ptr<TextureData> textureData);
 
 private:
 	void processQueue();
 	void threadProc();
 
-	std::list<std::shared_ptr<TextureData> > mTextureDataQ;
+	std::list<std::shared_ptr<TextureData> > 										mTextureDataQ;
+	std::map<TextureData*, std::list<std::shared_ptr<TextureData> >::iterator > 	mTextureDataLookup;
+
 	std::thread					mThread;
 	std::mutex					mMutex;
 	std::condition_variable		mEvent;

@@ -36,8 +36,11 @@ void TextureData::initFromPath(const std::string& path)
 bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length)
 {
 	// If already initialised then don't read again
-	if (mDataRGBA)
-		return true;
+	{
+		std::unique_lock<std::mutex> lock(mMutex);
+		if (mDataRGBA)
+			return true;
+	}
 
 	// nsvgParse excepts a modifiable, null-terminated string
 	char* copy = (char*)malloc(length + 1);
@@ -74,13 +77,16 @@ bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length
 		mHeight = (size_t)round(((float)mWidth / svgImage->width) * svgImage->height);
 	}
 
-	mDataRGBA = new unsigned char[mWidth * mHeight * 4];
+	unsigned char* dataRGBA = new unsigned char[mWidth * mHeight * 4];
 
 	NSVGrasterizer* rast = nsvgCreateRasterizer();
-	nsvgRasterize(rast, svgImage, 0, 0, mHeight / svgImage->height, mDataRGBA, mWidth, mHeight, mWidth * 4);
+	nsvgRasterize(rast, svgImage, 0, 0, mHeight / svgImage->height, dataRGBA, mWidth, mHeight, mWidth * 4);
 	nsvgDeleteRasterizer(rast);
 
-	ImageIO::flipPixelsVert(mDataRGBA, mWidth, mHeight);
+	ImageIO::flipPixelsVert(dataRGBA, mWidth, mHeight);
+
+	std::unique_lock<std::mutex> lock(mMutex);
+	mDataRGBA = dataRGBA;
 
 	return true;
 }
@@ -90,8 +96,11 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 	size_t width, height;
 
 	// If already initialised then don't read again
-	if (mDataRGBA)
-		return true;
+	{
+		std::unique_lock<std::mutex> lock(mMutex);
+		if (mDataRGBA)
+			return true;
+	}
 
 	std::vector<unsigned char> imageRGBA = ImageIO::loadFromMemoryRGBA32((const unsigned char*)(fileData), length, width, height);
 	if (imageRGBA.size() == 0)
@@ -110,6 +119,7 @@ bool TextureData::initImageFromMemory(const unsigned char* fileData, size_t leng
 bool TextureData::initFromRGBA(const unsigned char* dataRGBA, size_t width, size_t height)
 {
 	// If already initialised then don't read again
+	std::unique_lock<std::mutex> lock(mMutex);
 	if (mDataRGBA)
 		return true;
 
@@ -124,10 +134,6 @@ bool TextureData::initFromRGBA(const unsigned char* dataRGBA, size_t width, size
 bool TextureData::load()
 {
 	bool retval = false;
-
-	// If we already have data then we're already loaded
-	if (mDataRGBA)
-		return true;
 
 	// Need to load. See if there is a file
 	if (!mPath.empty())
@@ -148,6 +154,7 @@ bool TextureData::load()
 
 bool TextureData::isLoaded()
 {
+	std::unique_lock<std::mutex> lock(mMutex);
 	if (mDataRGBA || (mTextureID != 0))
 		return true;
 	return false;
@@ -156,6 +163,7 @@ bool TextureData::isLoaded()
 bool TextureData::uploadAndBind()
 {
 	// See if it's already been uploaded
+	std::unique_lock<std::mutex> lock(mMutex);
 	if (mTextureID != 0)
 	{
 		glBindTexture(GL_TEXTURE_2D, mTextureID);
@@ -188,6 +196,7 @@ bool TextureData::uploadAndBind()
 
 void TextureData::releaseVRAM()
 {
+	std::unique_lock<std::mutex> lock(mMutex);
 	if (mTextureID != 0)
 	{
 		glDeleteTextures(1, &mTextureID);
@@ -199,6 +208,7 @@ void TextureData::releaseRAM()
 {
 	if (mReloadable)
 	{
+		std::unique_lock<std::mutex> lock(mMutex);
 		delete[] mDataRGBA;
 		mDataRGBA = 0;
 	}

@@ -316,13 +316,23 @@ void SystemView::render(const Eigen::Affine3f& parentTrans)
 		{
 			// selected
 			const std::shared_ptr<GuiComponent>& comp = mEntries.at(index).data.logoSelected;
+			const std::shared_ptr<GuiComponent>& comp_unselected = mEntries.at(index).data.logo;
 			comp->setOpacity(0xFF);
 			comp->render(logoTrans);
+			// Hint at the unselected item to ensure it is displayed quickly
+			TextureResource* tr = dynamic_cast<TextureResource*>(comp_unselected.get());
+			if (tr)
+				tr->loadHint();
 		}else{
 			// not selected
 			const std::shared_ptr<GuiComponent>& comp = mEntries.at(index).data.logo;
+			const std::shared_ptr<GuiComponent>& comp_selected = mEntries.at(index).data.logoSelected;
 			comp->setOpacity(0x80);
 			comp->render(logoTrans);
+			// Hint at the selected item to ensure it is displayed quickly
+			TextureResource* tr = dynamic_cast<TextureResource*>(comp_selected.get());
+			if (tr)
+				tr->loadHint();
 		}
 	}
 

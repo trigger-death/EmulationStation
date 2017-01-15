@@ -3,6 +3,7 @@
 #include <string>
 #include <memory>
 #include "platform.h"
+#include <mutex>
 #include GLHEADER
 
 class TextureResource;
@@ -48,6 +49,7 @@ public:
 	bool tiled() { return mTile; }
 
 private:
+	std::mutex		mMutex;
 	bool			mTile;
 	std::string		mPath;
 	GLuint 			mTextureID;

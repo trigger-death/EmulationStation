@@ -69,13 +69,18 @@ const Eigen::Vector2i TextureResource::getSize() const
 
 bool TextureResource::isTiled() const
 {
+	if (mTextureData != nullptr)
+		return mTextureData->tiled();
 	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
 	return data->tiled();
 }
 
 void TextureResource::bind()
 {
-	sTextureDataManager.bind(this);
+	if (mTextureData != nullptr)
+		mTextureData->uploadAndBind();
+	else
+		sTextureDataManager.bind(this);
 }
 
 std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile)
@@ -156,4 +161,10 @@ size_t TextureResource::getTotalTextureSize()
 	// Now get the total memory from the manager
 	total += sTextureDataManager.getTotalSize();
 	return total;
+}
+
+void TextureResource::loadHint()
+{
+	if (mTextureData == nullptr)
+		sTextureDataManager.get(this);
 }

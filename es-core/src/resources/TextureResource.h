@@ -32,6 +32,9 @@ public:
 	const Eigen::Vector2i getSize() const;
 	void bind();
 
+	// Hint to the texture data manager that this texture is likely to be used
+	void loadHint();
+
 	static size_t getTotalMemUsage(); // returns an approximation of total VRAM used by textures (in bytes)
 	static size_t getTotalTextureSize(); // returns the number of bytes that would be used if all textures were in memory
 
