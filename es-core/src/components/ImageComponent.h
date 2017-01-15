@@ -12,7 +12,7 @@
 class ImageComponent : public GuiComponent
 {
 public:
-	ImageComponent(Window* window);
+	ImageComponent(Window* window, bool forceLoad = false);
 	virtual ~ImageComponent();
 
 	//Loads the image at the given filepath. Will tile if tile is true (retrieves texture as tiling, creates vertices accordingly).
@@ -81,10 +81,14 @@ private:
 
 	void updateVertices();
 	void updateColors();
+	void fadeIn(bool textureLoaded);
 
 	unsigned int mColorShift;
 
 	std::shared_ptr<TextureResource> mTexture;
+	unsigned char			 mFadeOpacity;
+	bool					 mFading;
+	bool				     mForceLoad;
 };
 
 #endif

@@ -65,7 +65,7 @@ std::shared_ptr<TextureData> TextureDataManager::get(const TextureResource* key)
 	return tex;
 }
 
-void TextureDataManager::bind(const TextureResource* key)
+bool TextureDataManager::bind(const TextureResource* key)
 {
 	std::shared_ptr<TextureData> tex = get(key);
 	bool bound = false;
@@ -73,6 +73,7 @@ void TextureDataManager::bind(const TextureResource* key)
 		bound = tex->uploadAndBind();
 	if (!bound)
 		mBlank->uploadAndBind();
+	return bound;
 }
 
 size_t TextureDataManager::getTotalSize()

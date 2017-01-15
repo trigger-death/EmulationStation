@@ -16,7 +16,7 @@
 class TextureResource : public IReloadable
 {
 public:
-	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false);
+	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false);
 	void initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height);
 	virtual void initFromMemory(const char* file, size_t length);
 
@@ -30,7 +30,7 @@ public:
 	bool isTiled() const;
 
 	const Eigen::Vector2i getSize() const;
-	void bind();
+	bool bind();
 
 	// Hint to the texture data manager that this texture is likely to be used
 	void loadHint();
@@ -53,6 +53,7 @@ private:
 
 	Eigen::Vector2i					mSize;
 	Eigen::Vector2f					mSourceSize;
+	bool							mForceLoad;
 
 	typedef std::pair<std::string, bool> TextureKeyType;
 	static std::map< TextureKeyType, std::weak_ptr<TextureResource> > sTextureMap; // map of textures, used to prevent duplicate textures

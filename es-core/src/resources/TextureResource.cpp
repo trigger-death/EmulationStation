@@ -11,7 +11,7 @@ TextureDataManager		TextureResource::sTextureDataManager;
 std::map< TextureResource::TextureKeyType, std::weak_ptr<TextureResource> > TextureResource::sTextureMap;
 std::set<TextureResource*> 	TextureResource::sAllTextures;
 
-TextureResource::TextureResource(const std::string& path, bool tile) : mTextureData(nullptr)
+TextureResource::TextureResource(const std::string& path, bool tile) : mTextureData(nullptr), mForceLoad(false)
 {
 	// Create a texture data object for this texture
 	if (!path.empty())
@@ -75,15 +75,20 @@ bool TextureResource::isTiled() const
 	return data->tiled();
 }
 
-void TextureResource::bind()
+bool TextureResource::bind()
 {
 	if (mTextureData != nullptr)
+	{
 		mTextureData->uploadAndBind();
+		return true;
+	}
 	else
-		sTextureDataManager.bind(this);
+	{
+		return sTextureDataManager.bind(this);
+	}
 }
 
-std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile)
+std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile, bool forceLoad)
 {
 	std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
 
@@ -114,6 +119,14 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 		// Probably not. Add it to our map. We don't add SVGs because 2 svgs might be rasterized at different sizes
 		sTextureMap[key] = std::weak_ptr<TextureResource>(tex);
 	}
+
+	// Force load it if necessary. Note that it may get dumped from VRAM if we run low
+	if (forceLoad)
+	{
+		tex->mForceLoad = forceLoad;
+		data->load();
+	}
+
 	return tex;
 }
 
@@ -123,6 +136,8 @@ void TextureResource::rasterizeAt(size_t width, size_t height)
 	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
 	mSourceSize << (float)width, (float)height;
 	data->setSourceSize((float)width, (float)height);
+	if (mForceLoad)
+		data->load();
 }
 
 Eigen::Vector2f TextureResource::getSourceImageSize() const
