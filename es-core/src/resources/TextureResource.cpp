@@ -120,6 +120,9 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 		sTextureMap[key] = std::weak_ptr<TextureResource>(tex);
 	}
 
+	// Add it to the reloadable list
+	rm->addReloadable(tex);
+
 	// Force load it if necessary. Note that it may get dumped from VRAM if we run low
 	if (forceLoad)
 	{
@@ -182,4 +185,19 @@ void TextureResource::loadHint()
 {
 	if (mTextureData == nullptr)
 		sTextureDataManager.get(this);
+}
+
+void TextureResource::unload(std::shared_ptr<ResourceManager>& rm)
+{
+	// If this is a reloadable texture then just release it's resources
+	if (mTextureData == nullptr)
+	{
+		std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+		data->releaseVRAM();
+		data->releaseRAM();
+	}
+}
+
+void TextureResource::reload(std::shared_ptr<ResourceManager>& rm)
+{
 }

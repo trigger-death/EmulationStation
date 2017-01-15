@@ -40,8 +40,8 @@ public:
 
 protected:
 	TextureResource(const std::string& path, bool tile);
-	virtual void unload(std::shared_ptr<ResourceManager>& rm) { };
-	virtual void reload(std::shared_ptr<ResourceManager>& rm) { };
+	virtual void unload(std::shared_ptr<ResourceManager>& rm);
+	virtual void reload(std::shared_ptr<ResourceManager>& rm);
 
 private:
 	// mTextureData is used for textures that are not loaded from a file - these ones
