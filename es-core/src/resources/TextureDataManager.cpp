@@ -13,10 +13,12 @@ TextureDataManager::TextureDataManager()
 		data[i*4+3] = 255;
 	}
 	mBlank->initFromRGBA(data, 5, 5);
+	mLoader = new TextureLoader;
 }
 
 TextureDataManager::~TextureDataManager()
 {
+	delete mLoader;
 }
 
 std::shared_ptr<TextureData> TextureDataManager::add(const TextureResource* key, bool tiled)
@@ -66,9 +68,10 @@ std::shared_ptr<TextureData> TextureDataManager::get(const TextureResource* key)
 void TextureDataManager::bind(const TextureResource* key)
 {
 	std::shared_ptr<TextureData> tex = get(key);
+	bool bound = false;
 	if (tex != nullptr)
-		tex->uploadAndBind();
-	else
+		bound = tex->uploadAndBind();
+	if (!bound)
 		mBlank->uploadAndBind();
 }
 
@@ -105,5 +108,59 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex)
 		(*it)->releaseVRAM();
 		(*it)->releaseRAM();
 	}
-	tex->load();
+	mLoader->load(tex);
+	//tex->load();
+}
+
+TextureLoader::TextureLoader() : mThread(&TextureLoader::threadProc, this), mExit(false)
+{
+}
+
+TextureLoader::~TextureLoader()
+{
+	mExit = true;
+	mEvent.notify_one();
+	mThread.join();
+}
+
+void TextureLoader::threadProc()
+{
+	while (!mExit)
+	{
+		std::shared_ptr<TextureData> textureData;
+		{
+			// Wait for an event to say there is something in the queue
+			std::unique_lock<std::mutex> lock(mMutex);
+			mEvent.wait(lock);
+			if (!mTextureDataQ.empty())
+			{
+				textureData = mTextureDataQ.back();
+				mTextureDataQ.pop_back();
+			}
+		}
+		// Queue has been released here but we might have a texture to process
+		while (textureData)
+		{
+			textureData->load();
+
+			// See if there is another item in the queue
+			textureData = nullptr;
+			std::unique_lock<std::mutex> lock(mMutex);
+			if (!mTextureDataQ.empty())
+			{
+				textureData = mTextureDataQ.back();
+				mTextureDataQ.pop_back();
+			}
+		}
+	}
+}
+
+void TextureLoader::load(std::shared_ptr<TextureData> textureData)
+{
+	// Make sure it's not already loaded
+	if (!textureData->isLoaded())
+	{
+		mTextureDataQ.push_front(textureData);
+		mEvent.notify_one();
+	}
 }

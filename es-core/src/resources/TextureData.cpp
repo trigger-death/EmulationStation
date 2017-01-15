@@ -165,8 +165,7 @@ bool TextureData::uploadAndBind()
 		// Load it if necessary
 		if (!mDataRGBA)
 		{
-			if (!load())
-				return false;
+			return false;
 		}
 		// Make sure we're ready to upload
 		if ((mWidth == 0) || (mHeight == 0) || (mDataRGBA == nullptr))

@@ -5,8 +5,31 @@
 #include "resources/TextureData.h"
 #include <map>
 #include <memory>
+#include <thread>
+#include <mutex>
+#include <condition_variable>
+#include <functional>
 
 class TextureResource;
+
+class TextureLoader
+{
+public:
+	TextureLoader();
+	~TextureLoader();
+
+	void load(std::shared_ptr<TextureData> textureData);
+
+private:
+	void processQueue();
+	void threadProc();
+
+	std::list<std::shared_ptr<TextureData> > mTextureDataQ;
+	std::thread					mThread;
+	std::mutex					mMutex;
+	std::condition_variable		mEvent;
+	bool 						mExit;
+};
 
 //
 // This class manages the loading and unloading of textures
@@ -49,5 +72,6 @@ private:
 	std::list<std::shared_ptr<TextureData> >												mTextures;
 	std::map<const TextureResource*, std::list<std::shared_ptr<TextureData> >::iterator > 	mTextureLookup;
 	std::shared_ptr<TextureData>															mBlank;
+	TextureLoader*																			mLoader;
 };
 
