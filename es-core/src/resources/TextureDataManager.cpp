@@ -1,4 +1,5 @@
 #include "resources/TextureDataManager.h"
+#include "resources/TextureResource.h"
 #include "Settings.h"
 
 TextureDataManager::TextureDataManager()
@@ -92,25 +93,31 @@ size_t TextureDataManager::getCommittedSize()
 	return total;
 }
 
+size_t TextureDataManager::getQueueSize()
+{
+	return mLoader->getQueueSize();
+}
+
 void TextureDataManager::load(std::shared_ptr<TextureData> tex)
 {
 	// See if it's already loaded
 	if (tex->isLoaded())
 		return;
 	// Not loaded. Make sure there is room
-	size_t size = getCommittedSize();
+	size_t size = TextureResource::getTotalMemUsage();
 	size_t max_texture = (size_t)Settings::getInstance()->getInt("MaxVRAM") * 1024 * 1024;
 
 	for (auto it = mTextures.rbegin(); it != mTextures.rend(); ++it)
 	{
 		if (size < max_texture)
 			break;
-		size -= (*it)->getVRAMUsage();
+		//size -= (*it)->getVRAMUsage();
 		(*it)->releaseVRAM();
 		(*it)->releaseRAM();
 		// It may be already in the loader queue. In this case it wouldn't have been using
 		// any VRAM yet but it will be. Remove it from the loader queue
 		mLoader->remove(*it);
+		size = TextureResource::getTotalMemUsage();
 	}
 	mLoader->load(tex);
 	//tex->load();
@@ -197,4 +204,17 @@ void TextureLoader::remove(std::shared_ptr<TextureData> textureData)
 		mTextureDataQ.erase((*td).second);
 		mTextureDataLookup.erase(td);
 	}
+}
+
+size_t TextureLoader::getQueueSize()
+{
+	// Gets the amount of video memory that will be used once all textures in
+	// the queue are loaded
+	size_t mem = 0;
+	std::unique_lock<std::mutex> lock(mMutex);
+	for (auto tex : mTextureDataQ)
+	{
+		mem += tex->width() * tex->height() * 4;
+	}
+	return mem;
 }

@@ -12,7 +12,7 @@
 class ImageComponent : public GuiComponent
 {
 public:
-	ImageComponent(Window* window, bool forceLoad = false);
+	ImageComponent(Window* window, bool forceLoad = false, bool dynamic = true);
 	virtual ~ImageComponent();
 
 	//Loads the image at the given filepath. Will tile if tile is true (retrieves texture as tiling, creates vertices accordingly).
@@ -89,6 +89,7 @@ private:
 	unsigned char			 mFadeOpacity;
 	bool					 mFading;
 	bool				     mForceLoad;
+	bool					mDynamic;
 };
 
 #endif

@@ -11,13 +11,23 @@ TextureDataManager		TextureResource::sTextureDataManager;
 std::map< TextureResource::TextureKeyType, std::weak_ptr<TextureResource> > TextureResource::sTextureMap;
 std::set<TextureResource*> 	TextureResource::sAllTextures;
 
-TextureResource::TextureResource(const std::string& path, bool tile) : mTextureData(nullptr), mForceLoad(false)
+TextureResource::TextureResource(const std::string& path, bool tile, bool dynamic) : mTextureData(nullptr), mForceLoad(false)
 {
 	// Create a texture data object for this texture
 	if (!path.empty())
 	{
-		// If there is a path then used the texture manager to manage the texture data
-		std::shared_ptr<TextureData> data = sTextureDataManager.add(this, tile);
+		// If there is a path then the 'dynamic' flag tells us whether to use the texture
+		// data manager to manage loading/unloading of this texture
+		std::shared_ptr<TextureData> data;
+		if (dynamic)
+		{
+			data = sTextureDataManager.add(this, tile);
+		}
+		else
+		{
+			mTextureData = std::shared_ptr<TextureData>(new TextureData(tile));
+			data = mTextureData;
+		}
 		data->initFromPath(path);
 		mSize << data->width(), data->height();
 		mSourceSize << data->sourceWidth(), data->sourceHeight();
@@ -88,14 +98,14 @@ bool TextureResource::bind()
 	}
 }
 
-std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile, bool forceLoad)
+std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, bool tile, bool forceLoad, bool dynamic)
 {
 	std::shared_ptr<ResourceManager>& rm = ResourceManager::getInstance();
 
 	const std::string canonicalPath = getCanonicalPath(path);
 	if(canonicalPath.empty())
 	{
-		std::shared_ptr<TextureResource> tex(new TextureResource("", tile));
+		std::shared_ptr<TextureResource> tex(new TextureResource("", tile, false));
 		rm->addReloadable(tex); //make sure we get properly deinitialized even though we do nothing on reinitialization
 		return tex;
 	}
@@ -110,7 +120,7 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 
 	// need to create it
 	std::shared_ptr<TextureResource> tex;
-	tex = std::shared_ptr<TextureResource>(new TextureResource(key.first, tile));
+	tex = std::shared_ptr<TextureResource>(new TextureResource(key.first, tile, dynamic));
 	std::shared_ptr<TextureData> data = sTextureDataManager.get(tex.get());
 
 	// is it an SVG?
@@ -136,10 +146,14 @@ std::shared_ptr<TextureResource> TextureResource::get(const std::string& path, b
 // For scalable source images in textures we want to set the resolution to rasterize at
 void TextureResource::rasterizeAt(size_t width, size_t height)
 {
-	std::shared_ptr<TextureData> data = sTextureDataManager.get(this);
+	std::shared_ptr<TextureData> data;
+	if (mTextureData != nullptr)
+		data = mTextureData;
+	else
+		data = sTextureDataManager.get(this);
 	mSourceSize << (float)width, (float)height;
 	data->setSourceSize((float)width, (float)height);
-	if (mForceLoad)
+	if (mForceLoad || (mTextureData != nullptr))
 		data->load();
 }
 
@@ -164,6 +178,8 @@ size_t TextureResource::getTotalMemUsage()
 	}
 	// Now get the committed memory from the manager
 	total += sTextureDataManager.getCommittedSize();
+	// And the size of the loading queue
+	total += sTextureDataManager.getQueueSize();
 	return total;
 }
 
@@ -179,12 +195,6 @@ size_t TextureResource::getTotalTextureSize()
 	// Now get the total memory from the manager
 	total += sTextureDataManager.getTotalSize();
 	return total;
-}
-
-void TextureResource::loadHint()
-{
-	if (mTextureData == nullptr)
-		sTextureDataManager.get(this);
 }
 
 void TextureResource::unload(std::shared_ptr<ResourceManager>& rm)

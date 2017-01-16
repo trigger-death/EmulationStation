@@ -21,8 +21,9 @@ Eigen::Vector2f ImageComponent::getCenter() const
 		mPosition.y() - (getSize().y() * mOrigin.y()) + getSize().y() / 2);
 }
 
-ImageComponent::ImageComponent(Window* window, bool forceLoad) : GuiComponent(window),
-	mTargetIsMax(false), mFlipX(false), mFlipY(false), mOrigin(0.0, 0.0), mTargetSize(0, 0), mColorShift(0xFFFFFFFF), mForceLoad(forceLoad)
+ImageComponent::ImageComponent(Window* window, bool forceLoad, bool dynamic) : GuiComponent(window),
+	mTargetIsMax(false), mFlipX(false), mFlipY(false), mOrigin(0.0, 0.0), mTargetSize(0, 0), mColorShift(0xFFFFFFFF),
+	mForceLoad(forceLoad), mDynamic(dynamic)
 {
 	updateColors();
 }
@@ -103,7 +104,7 @@ void ImageComponent::setImage(std::string path, bool tile)
 	if(path.empty() || !ResourceManager::getInstance()->fileExists(path))
 		mTexture.reset();
 	else
-		mTexture = TextureResource::get(path, tile, mForceLoad);
+		mTexture = TextureResource::get(path, tile, mForceLoad, mDynamic);
 
 	resize();
 }
@@ -276,39 +277,42 @@ void ImageComponent::render(const Eigen::Affine3f& parentTrans)
 
 void ImageComponent::fadeIn(bool textureLoaded)
 {
-	if (!textureLoaded)
+	if (!mForceLoad)
 	{
-		// Start the fade if this is the first time we've encountered the unloaded texture
-		if (!mFading)
+		if (!textureLoaded)
 		{
-			// Start with a zero opacity and flag it as fading
-			mFadeOpacity = 0;
-			mFading = true;
-			// Set the colours to be translucent
-			mColorShift = (mColorShift >> 8 << 8) | 0;
+			// Start the fade if this is the first time we've encountered the unloaded texture
+			if (!mFading)
+			{
+				// Start with a zero opacity and flag it as fading
+				mFadeOpacity = 0;
+				mFading = true;
+				// Set the colours to be translucent
+				mColorShift = (mColorShift >> 8 << 8) | 0;
+				updateColors();
+			}
+		}
+		else if (mFading)
+		{
+			// The texture is loaded and we need to fade it in. The fade is based on the frame rate
+			// and is 1/4 second if running at 60 frames per second although the actual value is not
+			// that important
+			int opacity = mFadeOpacity + 255 / 15;
+			// See if we've finished fading
+			if (opacity >= 255)
+			{
+				mFadeOpacity = 255;
+				mFading = false;
+			}
+			else
+			{
+				mFadeOpacity = (unsigned char)opacity;
+			}
+			// Apply the combination of the target opacity and current fade
+			float newOpacity = (float)mOpacity * ((float)mFadeOpacity / 255.0f);
+			mColorShift = (mColorShift >> 8 << 8) | (unsigned char)newOpacity;
 			updateColors();
 		}
-	}
-	else if (mFading)
-	{
-		// The texture is loaded and we need to fade it in. The fade is based on the frame rate
-		// and is 1/4 second if running at 60 frames per second although the actual value is not
-		// that important
-		int opacity = mFadeOpacity + 255 / 15;
-		// See if we've finished fading
-		if (opacity >= 255)
-		{
-			mFadeOpacity = 255;
-			mFading = false;
-		}
-		else
-		{
-			mFadeOpacity = (unsigned char)opacity;
-		}
-		// Apply the combination of the target opacity and current fade
-		float newOpacity = (float)mOpacity * ((float)mFadeOpacity / 255.0f);
-		mColorShift = (mColorShift >> 8 << 8) | (unsigned char)newOpacity;
-		updateColors();
 	}
 }
 

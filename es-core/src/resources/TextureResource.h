@@ -16,7 +16,7 @@
 class TextureResource : public IReloadable
 {
 public:
-	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false);
+	static std::shared_ptr<TextureResource> get(const std::string& path, bool tile = false, bool forceLoad = false, bool dynamic = true);
 	void initFromPixels(const unsigned char* dataRGBA, size_t width, size_t height);
 	virtual void initFromMemory(const char* file, size_t length);
 
@@ -32,14 +32,11 @@ public:
 	const Eigen::Vector2i getSize() const;
 	bool bind();
 
-	// Hint to the texture data manager that this texture is likely to be used
-	void loadHint();
-
 	static size_t getTotalMemUsage(); // returns an approximation of total VRAM used by textures (in bytes)
 	static size_t getTotalTextureSize(); // returns the number of bytes that would be used if all textures were in memory
 
 protected:
-	TextureResource(const std::string& path, bool tile);
+	TextureResource(const std::string& path, bool tile, bool dynamic);
 	virtual void unload(std::shared_ptr<ResourceManager>& rm);
 	virtual void reload(std::shared_ptr<ResourceManager>& rm);
 

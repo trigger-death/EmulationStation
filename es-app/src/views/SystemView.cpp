@@ -43,13 +43,13 @@ void SystemView::populate()
 		// make logo
 		if(theme->getElement("system", "logo", "image"))
 		{
-			ImageComponent* logo = new ImageComponent(mWindow);
+			ImageComponent* logo = new ImageComponent(mWindow, false, false);
 			logo->setMaxSize(Eigen::Vector2f(logoSize().x(), logoSize().y()));
 			logo->applyTheme((*it)->getTheme(), "system", "logo", ThemeFlags::PATH);
 			logo->setPosition((logoSize().x() - logo->getSize().x()) / 2, (logoSize().y() - logo->getSize().y()) / 2); // center
 			e.data.logo = std::shared_ptr<GuiComponent>(logo);
 
-			ImageComponent* logoSelected = new ImageComponent(mWindow);
+			ImageComponent* logoSelected = new ImageComponent(mWindow, false, false);
 			logoSelected->setMaxSize(Eigen::Vector2f(logoSize().x() * SELECTED_SCALE, logoSize().y() * SELECTED_SCALE * 0.70f));
 			logoSelected->applyTheme((*it)->getTheme(), "system", "logo", ThemeFlags::PATH);
 			logoSelected->setPosition((logoSize().x() - logoSelected->getSize().x()) / 2, 
@@ -316,23 +316,13 @@ void SystemView::render(const Eigen::Affine3f& parentTrans)
 		{
 			// selected
 			const std::shared_ptr<GuiComponent>& comp = mEntries.at(index).data.logoSelected;
-			const std::shared_ptr<GuiComponent>& comp_unselected = mEntries.at(index).data.logo;
 			comp->setOpacity(0xFF);
 			comp->render(logoTrans);
-			// Hint at the unselected item to ensure it is displayed quickly
-			TextureResource* tr = dynamic_cast<TextureResource*>(comp_unselected.get());
-			if (tr)
-				tr->loadHint();
 		}else{
 			// not selected
 			const std::shared_ptr<GuiComponent>& comp = mEntries.at(index).data.logo;
-			const std::shared_ptr<GuiComponent>& comp_selected = mEntries.at(index).data.logoSelected;
 			comp->setOpacity(0x80);
 			comp->render(logoTrans);
-			// Hint at the selected item to ensure it is displayed quickly
-			TextureResource* tr = dynamic_cast<TextureResource*>(comp_selected.get());
-			if (tr)
-				tr->loadHint();
 		}
 	}
 

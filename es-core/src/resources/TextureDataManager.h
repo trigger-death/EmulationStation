@@ -21,6 +21,8 @@ public:
 	void load(std::shared_ptr<TextureData> textureData);
 	void remove(std::shared_ptr<TextureData> textureData);
 
+	size_t getQueueSize();
+
 private:
 	void processQueue();
 	void threadProc();
@@ -68,6 +70,9 @@ public:
 	size_t	getTotalSize();
 	// Get the total size of all committed textures (in VRAM) in bytes
 	size_t	getCommittedSize();
+	// Get the total size of all load-pending textures in the queue - these will
+	// be committed to VRAM as the queue is processed
+	size_t  getQueueSize();
 
 private:
 	void load(std::shared_ptr<TextureData> tex);
