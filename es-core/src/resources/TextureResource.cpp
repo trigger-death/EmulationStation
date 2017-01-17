@@ -22,13 +22,19 @@ TextureResource::TextureResource(const std::string& path, bool tile, bool dynami
 		if (dynamic)
 		{
 			data = sTextureDataManager.add(this, tile);
+			data->initFromPath(path);
+			// Force the texture manager to load it
+			sTextureDataManager.load(data);
 		}
 		else
 		{
 			mTextureData = std::shared_ptr<TextureData>(new TextureData(tile));
 			data = mTextureData;
+			data->initFromPath(path);
+			// Load it so we can read the width/height
+			data->load();
 		}
-		data->initFromPath(path);
+
 		mSize << data->width(), data->height();
 		mSourceSize << data->sourceWidth(), data->sourceHeight();
 	}

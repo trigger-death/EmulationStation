@@ -73,9 +73,10 @@ public:
 	// Get the total size of all load-pending textures in the queue - these will
 	// be committed to VRAM as the queue is processed
 	size_t  getQueueSize();
+	// Load a texture, freeing resources as necessary to make space
+	void load(std::shared_ptr<TextureData> tex);
 
 private:
-	void load(std::shared_ptr<TextureData> tex);
 
 	std::list<std::shared_ptr<TextureData> >												mTextures;
 	std::map<const TextureResource*, std::list<std::shared_ptr<TextureData> >::iterator > 	mTextureLookup;

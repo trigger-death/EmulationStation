@@ -27,10 +27,6 @@ void TextureData::initFromPath(const std::string& path)
 	mPath = path;
 	// Only textures with paths are reloadable
 	mReloadable = true;
-	// Load it so we can read the width/height
-	load();
-	// Also bind it to transfer from RAM to VRAM
-	uploadAndBind();
 }
 
 bool TextureData::initSVGFromMemory(const unsigned char* fileData, size_t length)
@@ -258,7 +254,7 @@ void TextureData::setSourceSize(float width, float height)
 
 size_t TextureData::getVRAMUsage()
 {
-	if (mTextureID != 0)
+	if ((mTextureID != 0) || (mDataRGBA != nullptr))
 		return mWidth * mHeight * 4;
 	else
 		return 0;
