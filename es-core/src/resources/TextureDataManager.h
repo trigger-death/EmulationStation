@@ -74,7 +74,7 @@ public:
 	// be committed to VRAM as the queue is processed
 	size_t  getQueueSize();
 	// Load a texture, freeing resources as necessary to make space
-	void load(std::shared_ptr<TextureData> tex);
+	void load(std::shared_ptr<TextureData> tex, bool block = false);
 
 private:
 

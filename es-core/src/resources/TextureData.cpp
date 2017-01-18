@@ -17,8 +17,8 @@ TextureData::TextureData(bool tile) : mTile(tile), mTextureID(0), mDataRGBA(null
 
 TextureData::~TextureData()
 {
-	delete[] mDataRGBA;
-	mDataRGBA = 0;
+	releaseVRAM();
+	releaseRAM();
 }
 
 void TextureData::initFromPath(const std::string& path)
@@ -174,6 +174,7 @@ bool TextureData::uploadAndBind()
 		// Make sure we're ready to upload
 		if ((mWidth == 0) || (mHeight == 0) || (mDataRGBA == nullptr))
 			return false;
+		glGetError();
 		//now for the openGL texture stuff
 		glGenTextures(1, &mTextureID);
 		glBindTexture(GL_TEXTURE_2D, mTextureID);
@@ -202,12 +203,9 @@ void TextureData::releaseVRAM()
 
 void TextureData::releaseRAM()
 {
-	if (mReloadable)
-	{
-		std::unique_lock<std::mutex> lock(mMutex);
-		delete[] mDataRGBA;
-		mDataRGBA = 0;
-	}
+	std::unique_lock<std::mutex> lock(mMutex);
+	delete[] mDataRGBA;
+	mDataRGBA = 0;
 }
 
 size_t TextureData::width()

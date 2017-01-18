@@ -23,8 +23,8 @@ TextureResource::TextureResource(const std::string& path, bool tile, bool dynami
 		{
 			data = sTextureDataManager.add(this, tile);
 			data->initFromPath(path);
-			// Force the texture manager to load it
-			sTextureDataManager.load(data);
+			// Force the texture manager to load it using a blocking load
+			sTextureDataManager.load(data, true);
 		}
 		else
 		{

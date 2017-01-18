@@ -98,7 +98,7 @@ size_t TextureDataManager::getQueueSize()
 	return mLoader->getQueueSize();
 }
 
-void TextureDataManager::load(std::shared_ptr<TextureData> tex)
+void TextureDataManager::load(std::shared_ptr<TextureData> tex, bool block)
 {
 	// See if it's already loaded
 	if (tex->isLoaded())
@@ -121,7 +121,10 @@ void TextureDataManager::load(std::shared_ptr<TextureData> tex)
 		mLoader->remove(*it);
 		size = TextureResource::getTotalMemUsage();
 	}
-	mLoader->load(tex);
+	if (!block)
+		mLoader->load(tex);
+	else
+		tex->load();
 }
 
 TextureLoader::TextureLoader() : mThread(&TextureLoader::threadProc, this), mExit(false)
