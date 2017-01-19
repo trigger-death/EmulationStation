@@ -83,6 +83,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			}else{
 				onFocusLost();
 				ViewController::get()->goToSystemView(getCursor()->getSystem());
+				Sound::getFromTheme(getTheme(), getName(), "systemBack")->play();
 			}
 
 			return true;
@@ -92,6 +93,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			{
 				onFocusLost();
 				ViewController::get()->goToNextGameList();
+				Sound::getFromTheme(getTheme(), getName(), "systemChangeQuick")->play();
 				return true;
 			}
 		}else if(config->isMappedTo("left", input))
@@ -100,6 +102,7 @@ bool ISimpleGameListView::input(InputConfig* config, Input input)
 			{
 				onFocusLost();
 				ViewController::get()->goToPrevGameList();
+				Sound::getFromTheme(getTheme(), getName(), "systemChangeQuick")->play();
 				return true;
 			}
 		}
