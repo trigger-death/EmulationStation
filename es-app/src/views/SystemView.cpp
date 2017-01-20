@@ -130,7 +130,7 @@ bool SystemView::input(InputConfig* config, Input input)
 		if(config->isMappedTo("a", input))
 		{
 			stopScrolling();
-			ViewController::get()->goToGameList(getSelected());
+			ViewController::get()->goToGameList(getSelected(), ViewController::ViewDirection::DOWN);
 			Sound::getFromTheme(getSelected()->getTheme(), "system", "systemEnter")->play();
 			return true;
 		}

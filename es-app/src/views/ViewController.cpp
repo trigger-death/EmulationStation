@@ -80,7 +80,8 @@ void ViewController::goToNextGameList()
 	assert(mState.viewing == GAME_LIST);
 	SystemData* system = getState().getSystem();
 	assert(system);
-	goToGameList(system->getNext());
+	SystemData* next = system->getNext();
+	goToGameList(system->getNext(), ViewController::ViewDirection::RIGHT);
 }
 
 void ViewController::goToPrevGameList()
@@ -88,11 +89,26 @@ void ViewController::goToPrevGameList()
 	assert(mState.viewing == GAME_LIST);
 	SystemData* system = getState().getSystem();
 	assert(system);
-	goToGameList(system->getPrev());
+	SystemData* prev = system->getPrev();
+	goToGameList(system->getPrev(), ViewController::ViewDirection::LEFT);
 }
 
-void ViewController::goToGameList(SystemData* system)
+void ViewController::goToGameList(SystemData* system, ViewDirection dir)
 {
+	auto newView = getGameListView(system);
+	SystemData* oldSystem = mState.system;
+	int id1 = getSystemId(oldSystem);
+	int id2 = getSystemId(system);
+	if (mCurrentView->getPosition().x() != id1 * (float)Renderer::getScreenWidth()) {
+		//mCurrentView->getPosition().x() = id1 * (float)Renderer::getScreenWidth();
+		mCurrentView->setPosition(Eigen::Vector3f(id1 * (float)Renderer::getScreenWidth(), mCurrentView->getPosition().y(), mCurrentView->getPosition().z()));
+		mCamera.translation().x() = -mCurrentView->getPosition().x();
+	}
+	if (newView->getPosition().x() != id2 * (float)Renderer::getScreenWidth()) {
+		//newView->getPosition().x() = id2 * (float)Renderer::getScreenWidth();
+		newView->setPosition(Eigen::Vector3f(id2 * (float)Renderer::getScreenWidth(), newView->getPosition().y(), newView->getPosition().z()));
+	}
+
 	if(mState.viewing == SYSTEM_SELECT)
 	{
 		// move system list
@@ -100,10 +116,23 @@ void ViewController::goToGameList(SystemData* system)
 		float offX = sysList->getPosition().x();
 		int sysId = getSystemId(system);
 		sysList->setPosition(sysId * (float)Renderer::getScreenWidth(), sysList->getPosition().y());
+		//sysList->setPosition(mCurrentView->getPosition().x(), sysList->getPosition().y());
 		offX = sysList->getPosition().x() - offX;
 		mCamera.translation().x() -= offX;
 	}
 
+	if (mState.viewing == GAME_LIST && Settings::getInstance()->getString("TransitionStyle") == "slide") {
+		if (id1 > id2 && dir == ViewDirection::RIGHT) {
+			mCurrentView->setPosition(newView->getPosition() - Eigen::Vector3f((float)Renderer::getScreenWidth(), 0, 0));
+			mCamera.translation().x() = -mCurrentView->getPosition().x();
+			//newView->setPosition(mCurrentView->getPosition() + Eigen::Vector3f((float)Renderer::getScreenWidth(), 0, 0));
+		}
+		else if (id1 < id2 && dir == ViewDirection::LEFT) {
+			mCurrentView->setPosition(newView->getPosition() + Eigen::Vector3f((float)Renderer::getScreenWidth(), 0, 0));
+			mCamera.translation().x() = -mCurrentView->getPosition().x();
+			//newView->setPosition(mCurrentView->getPosition() - Eigen::Vector3f((float)Renderer::getScreenWidth(), 0, 0));
+		}
+	}
 	mState.viewing = GAME_LIST;
 	mState.system = system;
 
@@ -111,7 +140,7 @@ void ViewController::goToGameList(SystemData* system)
 	{
 		mCurrentView->onHide();
 	}
-	mCurrentView = getGameListView(system);
+	mCurrentView = newView;
 	if (mCurrentView)
 	{
 		mCurrentView->onShow();

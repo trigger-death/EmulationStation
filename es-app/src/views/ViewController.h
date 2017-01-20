@@ -24,10 +24,17 @@ public:
 	inline void reloadGameListView(SystemData* system, bool reloadTheme = false) { reloadGameListView(getGameListView(system).get(), reloadTheme); }
 	void reloadAll(); // Reload everything with a theme.  Used when the "ThemeSet" setting changes.
 
+	enum ViewDirection
+	{
+		LEFT,
+		RIGHT,
+		DOWN
+	};
+
 	// Navigation.
 	void goToNextGameList();
 	void goToPrevGameList();
-	void goToGameList(SystemData* system);
+	void goToGameList(SystemData* system, ViewDirection dir);
 	void goToSystemView(SystemData* system);
 	void goToStart();
 
